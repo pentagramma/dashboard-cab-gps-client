@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import React, { useCallback, useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -14,33 +13,10 @@ import {
 } from 'recharts';
 import { GoogleMap, Marker, Polyline, LoadScript } from '@react-google-maps/api';
 
-const Dashboard = () => {
-  const [rides, setRides] = useState([]);
-  const [selectedMmiId, setSelectedMmiId] = useState('');
-  const [selectedTripId, setSelectedTripId] = useState('');
-
-  useEffect(() => {
-    const fetchRides = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/rides');
-        setRides(response.data);
-      } catch (error) {
-        console.error('Error fetching rides data:', error);
-      }
-    };
-    fetchRides();
-  }, []);
-
-  const tripsForSelectedMmiId = selectedMmiId ? rides.filter((ride) => ride.mmi_id === selectedMmiId) : rides;
-
-  const handleMmiIdChange = useCallback((event) => {
-    setSelectedMmiId(event.target.value);
-    setSelectedTripId('');
-  }, []);
-
-  const handleTripIdChange = useCallback((event) => {
-    setSelectedTripId(event.target.value);
-  }, []);
+const Dashboard = ({ rides, selectedMmiId }) => {
+  const tripsForSelectedMmiId = useMemo(() => {
+    return selectedMmiId ? rides.filter((ride) => ride.mmi_id === selectedMmiId) : rides;
+  }, [selectedMmiId, rides]);
 
   const aggregateData = useCallback(
     (key, label) => {
@@ -49,47 +25,29 @@ const Dashboard = () => {
     [tripsForSelectedMmiId]
   );
 
-  const distanceData = aggregateData('distance', 'km');
-  const movementDurationData = aggregateData('movement_duration', 's');
-  const idleDurationData = aggregateData('idle_duration', 's');
-  const stoppageDurationData = aggregateData('stoppage_duration', 's');
-  const speedData = aggregateData('average_speed', 'km/h');
+  const distanceData = useMemo(() => aggregateData('distance', 'km'), [aggregateData]);
+  const movementDurationData = useMemo(() => aggregateData('movement_duration', 's'), [aggregateData]);
+  const idleDurationData = useMemo(() => aggregateData('idle_duration', 's'), [aggregateData]);
+  const stoppageDurationData = useMemo(() => aggregateData('stoppage_duration', 's'), [aggregateData]);
+  const speedData = useMemo(() => aggregateData('average_speed', 'km/h'), [aggregateData]);
 
-  const startStopLocationData = tripsForSelectedMmiId.map((ride, index) => ({
-    index: index + 1,
-    startLocation: ride.drive_locations[0]
-      ? `${ride.drive_locations[0].start_location.lat},${ride.drive_locations[0].start_location.long}`
-      : '',
-    stopLocation:
-      ride.drive_locations.length > 0
-        ? `${ride.drive_locations[ride.drive_locations.length - 1].end_location.lat},${ride.drive_locations[ride.drive_locations.length - 1].end_location.long}`
+  const startStopLocationData = useMemo(() => {
+    return tripsForSelectedMmiId.map((ride, index) => ({
+      index: index + 1,
+      startLocation: ride.drive_locations[0]
+        ? `${ride.drive_locations[0].start_location.lat},${ride.drive_locations[0].start_location.long}`
         : '',
-  }));
+      stopLocation:
+        ride.drive_locations.length > 0
+          ? `${ride.drive_locations[ride.drive_locations.length - 1].end_location.lat},${ride.drive_locations[ride.drive_locations.length - 1].end_location.long}`
+          : '',
+    }));
+  }, [tripsForSelectedMmiId]);
 
-  const xAxisTicks = Array.from({ length: 8 }, (_, i) => (i + 1) * 5);
+  const xAxisTicks = useMemo(() => Array.from({ length: 8 }, (_, i) => (i + 1) * 5), []);
 
   return (
     <div className="grid grid-cols-3 gap-4 p-4">
-      {/* Dropdown for MMI IDs */}
-      <div className="col-span-3 mb-4">
-        <label htmlFor="mmiId" className="font-semibold">
-          Select MMI ID:
-        </label>
-        <select
-          id="mmiId"
-          className="ml-2 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500"
-          value={selectedMmiId}
-          onChange={handleMmiIdChange}
-        >
-          <option value="">All</option>
-          {rides.map((ride) => (
-            <option key={ride._id} value={ride.mmi_id}>
-              {ride.mmi_id}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {/* Distance Chart */}
       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Distance</h2>
@@ -97,7 +55,7 @@ const Dashboard = () => {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={distanceData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" ticks={xAxisTicks} />
+              <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
               <YAxis />
               <Tooltip />
               <Legend />
@@ -114,7 +72,7 @@ const Dashboard = () => {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={movementDurationData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" ticks={xAxisTicks} />
+              <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
               <YAxis />
               <Tooltip />
               <Legend />
@@ -131,7 +89,7 @@ const Dashboard = () => {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={idleDurationData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" ticks={xAxisTicks} />
+              <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
               <YAxis />
               <Tooltip />
               <Legend />
@@ -148,7 +106,7 @@ const Dashboard = () => {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stoppageDurationData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" ticks={xAxisTicks} />
+              <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
               <YAxis />
               <Tooltip />
               <Legend />
@@ -160,12 +118,12 @@ const Dashboard = () => {
 
       {/* Speed Chart */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Speed</h2>
+        <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={speedData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" ticks={xAxisTicks} />
+              <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
               <YAxis />
               <Tooltip />
               <Legend />
