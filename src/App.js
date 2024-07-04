@@ -3,6 +3,7 @@ import axios from 'axios';
 import './App.css';
 import Dashboard from './components/Dashboard';
 import Navbar from './components/Navbar';
+import Header from './components/Header';
 
 function App() {
   const [rides, setRides] = useState([]);
@@ -26,9 +27,7 @@ function App() {
 
   return (
     <div className="App">
-      <header className='App-header'>
-        <h1>Cab Service Dashboard</h1>
-      </header>
+      <Header />
       <Navbar selectedMmiId={selectedMmiId} handleMmiIdChange={handleMmiIdChange} rides={rides} />
       <Dashboard selectedMmiId={selectedMmiId} rides={rides} />
     </div>
