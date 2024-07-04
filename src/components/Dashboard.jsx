@@ -47,7 +47,7 @@ const Dashboard = ({ rides, selectedMmiId }) => {
   const xAxisTicks = useMemo(() => Array.from({ length: 8 }, (_, i) => (i + 1) * 5), []);
 
   return (
-    <div className="grid grid-cols-3 gap-4 p-4">
+    <div className="grid grid-cols-3 gap-4 p-4 bg-gray-200">
       {/* Distance Chart */}
       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Distance</h2>
