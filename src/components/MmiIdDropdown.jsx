@@ -14,7 +14,7 @@ const MmiIdDropdown = ({ rides, onChange }) => {
   return (
     <select
       id="mmiId"
-      className="ml-2 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500"
+      className="ml-2 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500 font-ruda"
       value={selectedMmiId}
       onChange={handleMmiIdChange}
     >

@@ -1,3 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Bubbler+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Ruda:wght@400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Englebert&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

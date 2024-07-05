@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, forwardRef, useRef } from 'react';
 import { IoIosSearch } from "react-icons/io";
+import { useNavigate } from 'react-router-dom';
 
-const Navbar = ({ selectedMmiId, handleMmiIdChange, rides }) => {
+const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMmiIds, setFilteredMmiIds] = useState([]);
-  const [activeIndex, setActiveIndex] = useState(-1); // Track active suggestion index
-
+  const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (searchQuery) {
@@ -19,7 +20,7 @@ const Navbar = ({ selectedMmiId, handleMmiIdChange, rides }) => {
     } else {
       setFilteredMmiIds([]);
     }
-    setActiveIndex(-1); // Reset active index when search query changes
+    setActiveIndex(-1);
   }, [searchQuery, rides]);
 
   const handleSearchChange = (e) => {
@@ -30,6 +31,7 @@ const Navbar = ({ selectedMmiId, handleMmiIdChange, rides }) => {
     setSearchQuery(mmiId);
     handleMmiIdChange({ target: { value: mmiId } });
     setFilteredMmiIds([]);
+    navigate(`/dashboard?mmiId=${mmiId}`); // Navigate to dashboard with the selected MMI ID
   };
 
   const handleKeyPress = (e) => {
@@ -46,18 +48,21 @@ const Navbar = ({ selectedMmiId, handleMmiIdChange, rides }) => {
 
   const handleSuggestionClick = (mmiId) => {
     handleMmiIdSelect(mmiId);
-    inputRef.current.focus(); // Refocus the input after selecting suggestion
+    inputRef.current.focus();
   };
 
   return (
-    <div className='w-full h-[70px] bg-purple-950 text-white flex items-center justify-between px-10'>
+    <div ref={ref} className='w-full h-[70px] bg-purple-950 text-white flex items-center justify-between px-10 font-ruda'>
       <div>
         <label htmlFor="mmiId" className="font-semibold mr-2 text-yellow-400">Select MMI ID:</label>
         <select
           id="mmiId"
           className="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500 text-black"
           value={selectedMmiId}
-          onChange={handleMmiIdChange}
+          onChange={(e) => {
+            handleMmiIdChange(e);
+            navigate(`/dashboard?mmiId=${e.target.value}`);
+          }}
         >
           <option value="">All</option>
           {rides.map((ride) => (
@@ -70,7 +75,7 @@ const Navbar = ({ selectedMmiId, handleMmiIdChange, rides }) => {
       <div className="text-center flex-grow">
         {selectedMmiId && (
           <span className="text-xl font-semibold text-white">
-            Showing stats for MMI ID: <span className='text-yellow-400'>{selectedMmiId}</span> 
+            Showing stats for MMI ID: <span className='text-yellow-400'>{selectedMmiId}</span>
           </span>
         )}
       </div>
@@ -80,10 +85,10 @@ const Navbar = ({ selectedMmiId, handleMmiIdChange, rides }) => {
             ref={inputRef}
             type="search"
             placeholder='Search for MMI ID'
-            className='pl-3 pr-10 h-[40px] rounded-full text-black no-clear-button w-full'
+            className='pl-5 pr-10 h-[40px] rounded-full text-black no-clear-button w-full'
             value={searchQuery}
             onChange={handleSearchChange}
-            onKeyDown={handleKeyPress} // Changed to onKeyDown to capture arrow keys
+            onKeyDown={handleKeyPress}
           />
           <IoIosSearch
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer hover:scale-125 duration-300 size-[20px]"
@@ -107,6 +112,6 @@ const Navbar = ({ selectedMmiId, handleMmiIdChange, rides }) => {
       </div>
     </div>
   );
-};
+});
 
 export default Navbar;
