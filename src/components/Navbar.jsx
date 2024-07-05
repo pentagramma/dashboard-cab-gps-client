@@ -1,13 +1,13 @@
 import React, { useState, useEffect, forwardRef, useRef } from 'react';
 import { IoIosSearch } from "react-icons/io";
-import { useNavigate } from 'react-router-dom';
+
 
 const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMmiIds, setFilteredMmiIds] = useState([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef(null);
-  const navigate = useNavigate();
+  
 
   useEffect(() => {
     if (searchQuery) {
@@ -31,7 +31,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => 
     setSearchQuery(mmiId);
     handleMmiIdChange({ target: { value: mmiId } });
     setFilteredMmiIds([]);
-    navigate(`/dashboard?mmiId=${mmiId}`); // Navigate to dashboard with the selected MMI ID
+    // Navigate to dashboard with the selected MMI ID
   };
 
   const handleKeyPress = (e) => {
@@ -61,7 +61,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => 
           value={selectedMmiId}
           onChange={(e) => {
             handleMmiIdChange(e);
-            navigate(`/dashboard?mmiId=${e.target.value}`);
+            
           }}
         >
           <option value="">All</option>

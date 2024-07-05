@@ -34,7 +34,7 @@ const DetailedDashboard = ({ selectedTrip }) => {
       >
        <IoIosArrowBack /> BACK
       </button>
-      <div className="col-span-2 row-span-3 bg-white p-4 rounded-lg shadow-lg mt-14">
+      <div className="col-span-2 row-span-3 bg-white p-4 rounded-lg shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Trip Map</h2>
         <LoadScript googleMapsApiKey="AIzaSyCyaFfzx2egZfBNTFFXX3HRP-ypSBQhd28">
           <GoogleMap
