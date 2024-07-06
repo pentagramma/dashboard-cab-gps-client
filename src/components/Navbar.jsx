@@ -1,13 +1,13 @@
 import React, { useState, useEffect, forwardRef, useRef } from 'react';
 import { IoIosSearch } from "react-icons/io";
-
+import { useLocation } from 'react-router-dom';
 
 const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMmiIds, setFilteredMmiIds] = useState([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef(null);
-  
+  const location = useLocation(); // Get the current location
 
   useEffect(() => {
     if (searchQuery) {
@@ -51,6 +51,9 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => 
     inputRef.current.focus();
   };
 
+  // Determine if the current path is the detailed dashboard path
+  const isDetailedDashboard = location.pathname === '/details';
+
   return (
     <div ref={ref} className='w-full h-[70px] bg-purple-950 text-white flex items-center justify-between px-10 font-ruda'>
       <div>
@@ -61,8 +64,8 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => 
           value={selectedMmiId}
           onChange={(e) => {
             handleMmiIdChange(e);
-            
           }}
+          disabled={isDetailedDashboard} // Disable the dropdown if on the detailed dashboard
         >
           <option value="">All</option>
           {rides.map((ride) => (
@@ -89,6 +92,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => 
             value={searchQuery}
             onChange={handleSearchChange}
             onKeyDown={handleKeyPress}
+            disabled={isDetailedDashboard} // Disable the search bar if on the detailed dashboard
           />
           <IoIosSearch
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer hover:scale-125 duration-300 size-[20px]"
