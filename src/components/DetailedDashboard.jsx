@@ -6,7 +6,6 @@ import { GoogleMap, Marker, LoadScript } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
 import { IoIosArrowBack } from "react-icons/io";
 
-
 const DetailedDashboard = ({ selectedTrip }) => {
   const navigate = useNavigate();
 
@@ -15,12 +14,23 @@ const DetailedDashboard = ({ selectedTrip }) => {
   }
 
   const data = [
-    { name: 'Distance', value: selectedTrip.distance },
-    { name: 'Movement Duration', value: selectedTrip.movement_duration },
-    { name: 'Idle Duration', value: selectedTrip.idle_duration },
-    { name: 'Stoppage Duration', value: selectedTrip.stoppage_duration },
-    { name: 'Average Speed', value: selectedTrip.average_speed }
+    { name: 'Distance', value: selectedTrip.distance, unit: 'km' },
+    { name: 'Movement Duration', value: selectedTrip.movement_duration, unit: 's' },
+    { name: 'Idle Duration', value: selectedTrip.idle_duration, unit: 's' },
+    { name: 'Stoppage Duration', value: selectedTrip.stoppage_duration, unit: 's' },
+    { name: 'Average Speed', value: selectedTrip.average_speed, unit: 'km/h' }
   ];
+
+  const CustomTooltip = ({ payload, label, active }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="custom-tooltip bg-white p-2 border border-gray-400 rounded shadow-lg">
+          <p className="label">{`${label} : ${payload[0].value} ${payload[0].payload.unit}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   const handleBackClick = () => {
     navigate('/');
@@ -71,11 +81,11 @@ const DetailedDashboard = ({ selectedTrip }) => {
       <div className="bg-white p-4 rounded-lg shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Distance</h2>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={[{ name: 'Distance', value: selectedTrip.distance }]}>
+          <BarChart data={[data[0]]}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar dataKey="value" fill="#0088FE" />
           </BarChart>
@@ -84,11 +94,11 @@ const DetailedDashboard = ({ selectedTrip }) => {
       <div className="bg-white p-4 rounded-lg shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Movement Duration</h2>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={[{ name: 'Movement Duration', value: selectedTrip.movement_duration }]}>
+          <BarChart data={[data[1]]}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar dataKey="value" fill="#00C49F" />
           </BarChart>
@@ -97,11 +107,11 @@ const DetailedDashboard = ({ selectedTrip }) => {
       <div className="bg-white p-4 rounded-lg shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Idle Duration</h2>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={[{ name: 'Idle Duration', value: selectedTrip.idle_duration }]}>
+          <BarChart data={[data[2]]}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar dataKey="value" fill="#FFBB28" />
           </BarChart>
@@ -110,11 +120,11 @@ const DetailedDashboard = ({ selectedTrip }) => {
       <div className="bg-white p-4 rounded-lg shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Stoppage Duration</h2>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={[{ name: 'Stoppage Duration', value: selectedTrip.stoppage_duration }]}>
+          <BarChart data={[data[3]]}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar dataKey="value" fill="#FF8042" />
           </BarChart>
@@ -123,11 +133,11 @@ const DetailedDashboard = ({ selectedTrip }) => {
       <div className="bg-white p-4 rounded-lg shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
         <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={[{ name: 'Average Speed', value: selectedTrip.average_speed }]}>
+          <BarChart data={[data[4]]}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Legend />
             <Bar dataKey="value" fill="#8884d8" />
           </BarChart>
