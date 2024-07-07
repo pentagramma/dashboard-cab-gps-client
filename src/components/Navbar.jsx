@@ -64,7 +64,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
     <div ref={ref} className='w-full h-[70px] bg-purple-950 text-white flex items-center justify-between px-10 font-ruda'>
       <div className='mr-10 home-btn'>
         <button
-          className='p-2 border-white border rounded-full text-[25px]'
+          className='p-2 border-white border rounded-full text-[25px] home-button'
           onClick={handleHomeClick}
         >
           <IoHome />
@@ -78,7 +78,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
       )}
       <div className="text-center flex-grow">
         {selectedMmiId && (
-          <span className="text-xl font-semibold text-white">
+          <span className="text-xl font-semibold text-white mmid-show">
             Showing stats for MMI ID: <span className='text-yellow-400'>{selectedMmiId}</span>
           </span>
         )}

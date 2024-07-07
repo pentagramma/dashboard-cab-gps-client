@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   LineChart,
   Line,
@@ -14,7 +14,7 @@ import {
 import { GoogleMap, Marker, Polyline, LoadScript } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard = ({ rides }) => {
+const Dashboard = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) => {
   const navigate = useNavigate();
   const [unit, setUnit] = useState({
     movement_duration: 's',
@@ -22,19 +22,66 @@ const Dashboard = ({ rides }) => {
     stoppage_duration: 's',
   });
 
-  // Calculate aggregated data across all rides
-  const aggregateData = (key, label, conversion) => {
-    return rides.map((ride, index) => ({
+  const tripsForSelectedMmiId = useMemo(() => {
+    return selectedMmiId ? rides.filter((ride) => ride.mmi_id === selectedMmiId) : rides;
+  }, [selectedMmiId, rides]);
+
+  const aggregateData = useCallback(
+    (key, label, conversion) => {
+      return tripsForSelectedMmiId.map((ride, index) => ({
+        index: index + 1,
+        [label]: conversion ? (ride[key] / 60).toFixed(2) : ride[key],
+      }));
+    },
+    [tripsForSelectedMmiId]
+  );
+
+  const distanceData = useMemo(() => aggregateData('distance', 'km'), [aggregateData]);
+  const movementDurationData = useMemo(
+    () => aggregateData('movement_duration', unit.movement_duration, unit.movement_duration === 'min'),
+    [aggregateData, unit]
+  );
+  const idleDurationData = useMemo(
+    () => aggregateData('idle_duration', unit.idle_duration, unit.idle_duration === 'min'),
+    [aggregateData, unit]
+  );
+  const stoppageDurationData = useMemo(
+    () => aggregateData('stoppage_duration', unit.stoppage_duration, unit.stoppage_duration === 'min'),
+    [aggregateData, unit]
+  );
+  const speedData = useMemo(() => aggregateData('average_speed', 'km/h'), [aggregateData]);
+
+  const startStopLocationData = useMemo(() => {
+    return tripsForSelectedMmiId.map((ride, index) => ({
       index: index + 1,
-      [label]: conversion ? (ride[key] / 60).toFixed(2) : ride[key],
+      startLocation: ride.drive_locations[0]
+        ? `${ride.drive_locations[0].start_location.lat},${ride.drive_locations[0].start_location.long}`
+        : null,
+      stopLocation:
+        ride.drive_locations.length > 0
+          ? `${ride.drive_locations[ride.drive_locations.length - 1].end_location.lat},${ride.drive_locations[ride.drive_locations.length - 1].end_location.long}`
+          : null,
     }));
+  }, [tripsForSelectedMmiId]);
+
+  const xAxisTicks = useMemo(() => Array.from({ length: 8 }, (_, i) => (i + 1) * 5), []);
+
+  const handleChartClick = (data) => {
+    if (data && data.activePayload) {
+      const selectedTrip = tripsForSelectedMmiId[data.activePayload[0].payload.index - 1];
+      setSelectedTrip(selectedTrip);
+      setStartEndTime({ startTime: selectedTrip.start_time, endTime: selectedTrip.end_time });
+      navigate('/details');
+    }
   };
 
-  const distanceData = useMemo(() => aggregateData('distance', 'km'), [rides]);
-  const movementDurationData = useMemo(() => aggregateData('movement_duration', unit.movement_duration, unit.movement_duration === 'min'), [rides, unit]);
-  const idleDurationData = useMemo(() => aggregateData('idle_duration', unit.idle_duration, unit.idle_duration === 'min'), [rides, unit]);
-  const stoppageDurationData = useMemo(() => aggregateData('stoppage_duration', unit.stoppage_duration, unit.stoppage_duration === 'min'), [rides, unit]);
-  const speedData = useMemo(() => aggregateData('average_speed', 'km/h'), [rides]);
+  const validLocations = startStopLocationData.filter(data => data.startLocation || data.stopLocation);
+  const initialCenter = validLocations.length > 0
+    ? {
+        lat: parseFloat(validLocations[0].startLocation.split(',')[0]),
+        lng: parseFloat(validLocations[0].startLocation.split(',')[1]),
+      }
+    : { lat: 0, lng: 0 };
 
   const toggleUnit = (key) => {
     setUnit((prevUnit) => ({
@@ -53,15 +100,8 @@ const Dashboard = ({ rides }) => {
     return {};
   };
 
-  const xAxisTicks = Array.from({ length: 8 }, (_, i) => (i + 1) * 5);
-
-  const handleChartClick = (data) => {
-    if (data && data.activePayload) {
-      navigate('/details');
-    }
-  };
-
   return (
+    
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-gray-200 font-englebert">
       {/* Distance Chart */}
       <div className="bg-white p-4 rounded-lg shadow flex-row">
@@ -107,8 +147,8 @@ const Dashboard = ({ rides }) => {
         </div>
       </div>
 
-      {/* Speed Chart */}
-      <div className="bg-white p-4 rounded-lg shadow">
+       {/* Speed Chart */}
+       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
@@ -123,6 +163,7 @@ const Dashboard = ({ rides }) => {
           </ResponsiveContainer>
         </div>
       </div>
+     
 
       {/* Stoppage Duration Chart */}
       <div className="bg-white p-4 rounded-lg shadow">
@@ -140,7 +181,7 @@ const Dashboard = ({ rides }) => {
             <BarChart data={stoppageDurationData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
-              <YAxis />
+              <YAxis/>
               <Tooltip />
               <Legend />
               <Bar dataKey={unit.stoppage_duration} fill="#1C64F2" />
@@ -178,18 +219,61 @@ const Dashboard = ({ rides }) => {
       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Start/Stop Location</h2>
         <div className="h-96">
-          <LoadScript googleMapsApiKey="YOUR_API_KEY">
+          <LoadScript googleMapsApiKey="AIzaSyCyaFfzx2egZfBNTFFXX3HRP-ypSBQhd28">
             <GoogleMap
               mapContainerStyle={{ width: '100%', height: '100%' }}
               zoom={10}
-              center={{ lat: 0, lng: 0 }}
+              center={initialCenter}
             >
-              {/* Map markers and polylines logic here */}
+              {validLocations.map((data, index) => (
+                <React.Fragment key={index}>
+                  {data.startLocation && (
+                    <Marker
+                      position={{
+                        lat: parseFloat(data.startLocation.split(',')[0]),
+                        lng: parseFloat(data.startLocation.split(',')[1]),
+                      }}
+                      icon={{
+                        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                        
+                      }}
+                    />
+                  )}
+                  {data.stopLocation && (
+                    <Marker
+                      position={{
+                        lat: parseFloat(data.stopLocation.split(',')[0]),
+                        lng: parseFloat(data.stopLocation.split(',')[1]),
+                      }}
+                      icon={{
+                        url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                        
+                      }}
+                    />
+                  )}
+                  {data.startLocation && data.stopLocation && (
+                    <Polyline
+                      path={[
+                        {
+                          lat: parseFloat(data.startLocation.split(',')[0]),
+                          lng: parseFloat(data.startLocation.split(',')[1]),
+                        },
+                        {
+                          lat: parseFloat(data.stopLocation.split(',')[0]),
+                          lng: parseFloat(data.stopLocation.split(',')[1]),
+                        },
+                      ]}
+                      options={{ strokeColor: '#FF0000', strokeWeight: 2 }}
+                    />
+                  )}
+                </React.Fragment>
+              ))}
             </GoogleMap>
           </LoadScript>
         </div>
       </div>
     </div>
+    
   );
 };
 
