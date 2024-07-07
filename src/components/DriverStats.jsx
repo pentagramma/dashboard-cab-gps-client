@@ -14,7 +14,7 @@ import {
 import { GoogleMap, Marker, Polyline, LoadScript } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) => {
+const DriverStat = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) => {
   const navigate = useNavigate();
   const [unit, setUnit] = useState({
     movement_duration: 's',
@@ -277,4 +277,4 @@ const Dashboard = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) =
   );
 };
 
-export default Dashboard;
+export default DriverStat;
