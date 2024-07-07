@@ -59,13 +59,13 @@ const DetailedDashboard = ({ selectedTrip }) => {
   return (
     <div className="w-full h-full bg-gray-200 p-4 grid grid-cols-1 lg:grid-cols-3 gap-4 font-englebert">
       <button
-        className='text-2xl w-24 font-ruda font-bold border border-purple-950 hover:bg-purple-950 hover:text-white hover:scale-110 duration-300 text-center rounded-2xl pt-1 pr-1 flex items-center justify-center'
+        className='w-[30%] font-ruda font-bold border border-purple-950 hover:bg-purple-950 hover:text-white hover:scale-110 duration-300 text-center rounded-2xl pt-1 pr-1 flex items-center justify-center'
         onClick={handleBackClick}
       >
         <IoIosArrowBack /> BACK
       </button>
       <div className="col-span-1 lg:col-span-2 row-span-3 bg-white p-4 rounded-lg shadow-lg">
-        <h2 className="text-lg font-semibold mb-4">Trip Map</h2>
+      <h2 className="text-lg font-semibold mb-4">Trip Map</h2>
         <div className="w-full h-96 lg:h-[94%]">
           <LoadScript googleMapsApiKey="AIzaSyCyaFfzx2egZfBNTFFXX3HRP-ypSBQhd28">
             <GoogleMap
