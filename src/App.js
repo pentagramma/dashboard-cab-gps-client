@@ -7,6 +7,7 @@ import Header from "./components/Header";
 import DetailedDashboard from "./components/DetailedDashboard";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Filters from "./components/Filters";
+import DriverStats from "./components/DriverStats";
 
 function App() {
   const [rides, setRides] = useState([]);
@@ -73,6 +74,10 @@ function App() {
         <Route
           path="/details"
           element={<DetailedDashboard selectedTrip={selectedTrip} />}
+        />
+        <Route
+          path="/driverstat/:mmiId"
+          element={<DriverStats selectedMmiId={selectedMmiId} rides={rides} />}
         />
       </Routes>
     </Router>

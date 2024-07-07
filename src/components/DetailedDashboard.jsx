@@ -77,33 +77,31 @@ const DetailedDashboard = ({ selectedTrip }) => {
               }}
             >
               {selectedTrip.drive_locations.map((location, index) => (
-                <React.Fragment key={index}>
-                  {location.start_location && (
-                    <Marker
-                      position={{
-                        lat: location.start_location.lat,
-                        lng: location.start_location.long
-                      }}
-                      icon={{
-                        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                        
-                      }}
-                    />
-                  )}
-                  {location.end_location && (
-                    <Marker
-                      position={{
-                        lat: location.end_location.lat,
-                        lng: location.end_location.long
-                      }}
-                      icon={{
-                        url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                        
-                      }}
-                    />
-                  )}
-                </React.Fragment>
-              ))}
+  <React.Fragment key={index}>
+    {location.start_location && (
+      <Marker
+        position={{
+          lat: location.start_location.lat,
+          lng: location.start_location.long
+        }}
+        icon={{
+          url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+        }}
+      />
+    )}
+    {location.end_location && (
+      <Marker
+        position={{
+          lat: location.end_location.lat,
+          lng: location.end_location.long
+        }}
+        icon={{
+          url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+        }}
+      />
+    )}
+  </React.Fragment>
+))}
             </GoogleMap>
           </LoadScript>
         </div>

@@ -33,6 +33,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
     setSearchQuery(mmiId);
     handleMmiIdChange({ target: { value: mmiId } });
     setFilteredMmiIds([]);
+    navigate(`/driverstat/${mmiId}`);
   };
 
   const handleKeyPress = (e) => {
