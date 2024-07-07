@@ -53,6 +53,7 @@ function App() {
         rides={rides}
         startTime={startEndTime.startTime}
         endTime={startEndTime.endTime}
+        setSelectedMmiId={setSelectedMmiId}
       />
       <Filters
         trips={trips}
@@ -65,6 +66,7 @@ function App() {
           element={
             <Dashboard
               selectedMmiId={selectedMmiId}
+              setSelectedMmiId={setSelectedMmiId}
               rides={rides}
               setSelectedTrip={setSelectedTrip}
               setStartEndTime={setStartEndTime}

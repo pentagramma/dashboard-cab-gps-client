@@ -8,8 +8,8 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
   const [filteredMmiIds, setFilteredMmiIds] = useState([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef(null);
-  const location = useLocation(); // Get the current location
-  const navigate = useNavigate(); // Hook for navigation
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (searchQuery) {
@@ -54,10 +54,9 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
   };
 
   const handleHomeClick = () => {
-    navigate('/'); // Navigate to home page
+    navigate('/');
   };
 
-  // Determine if the current path is the detailed dashboard path
   const isDetailedDashboard = location.pathname === '/details';
 
   return (
@@ -70,14 +69,14 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
           <IoHome />
         </button>
       </div>
-      {isDetailedDashboard && (
+      {isDetailedDashboard && startTime && endTime && (
         <div>
           <h1>Start Time: {new Date(startTime).toLocaleString()}</h1>
           <h1>End Time: {new Date(endTime).toLocaleString()}</h1>
         </div>
       )}
       <div className="text-center flex-grow">
-        {selectedMmiId && (
+        {selectedMmiId && isDetailedDashboard && (
           <span className="text-xl font-semibold text-white mmid-show">
             Showing stats for MMI ID: <span className='text-yellow-400'>{selectedMmiId}</span>
           </span>
@@ -93,7 +92,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
             value={searchQuery}
             onChange={handleSearchChange}
             onKeyDown={handleKeyPress}
-            disabled={isDetailedDashboard} // Disable the search bar if on the detailed dashboard
+            disabled={isDetailedDashboard}
           />
           <IoIosSearch
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer hover:scale-125 duration-300 size-[20px]"
