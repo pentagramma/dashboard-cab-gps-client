@@ -258,7 +258,7 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Start/Stop Location</h2>
         <div className="h-96">
-          <LoadScript googleMapsApiKey="YOUR_API_KEY_HERE">
+          <LoadScript googleMapsApiKey="AIzaSyCyaFfzx2egZfBNTFFXX3HRP-ypSBQhd28">
             <GoogleMap
               mapContainerStyle={{ width: '100%', height: '100%' }}
               zoom={10}

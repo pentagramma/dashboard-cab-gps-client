@@ -14,7 +14,7 @@ import {
 import { GoogleMap, Marker, Polyline, LoadScript } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
 
-const DriverStat = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) => {
+const DriverStat = ({ rides, selectedMmiId, setSelectedMmiId, setSelectedTrip, setStartEndTime }) => {
   const navigate = useNavigate();
   const [unit, setUnit] = useState({
     movement_duration: 's',
@@ -35,6 +35,11 @@ const DriverStat = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) 
     },
     [tripsForSelectedMmiId]
   );
+
+  const calculateAverage = (data, key) => {
+    const total = data.reduce((acc, curr) => acc + parseFloat(curr[key]), 0);
+    return (total / data.length).toFixed(2);
+  };
 
   const distanceData = useMemo(() => aggregateData('distance', 'km'), [aggregateData]);
   const movementDurationData = useMemo(
@@ -71,6 +76,7 @@ const DriverStat = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) 
       const selectedTrip = tripsForSelectedMmiId[data.activePayload[0].payload.index - 1];
       setSelectedTrip(selectedTrip);
       setStartEndTime({ startTime: selectedTrip.start_time, endTime: selectedTrip.end_time });
+      setSelectedMmiId(selectedTrip.mmi_id);
       navigate('/details');
     }
   };
@@ -101,12 +107,14 @@ const DriverStat = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) 
   };
 
   return (
-    
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-gray-200 font-englebert">
       {/* Distance Chart */}
       <div className="bg-white p-4 rounded-lg shadow flex-row">
         <div className='flex flex-row justify-between items-center'>
           <h2 className="text-lg font-semibold mb-4">Distance</h2>
+          <div className='text-sm'>
+            Avg: {calculateAverage(distanceData, 'km')} km
+          </div>
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
@@ -126,6 +134,9 @@ const DriverStat = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) 
       <div className="bg-white p-4 rounded-lg shadow">
         <div className='flex flex-row justify-between items-center'>
           <h2 className="text-lg font-semibold mb-4">Movement Duration</h2>
+          <div className='text-sm'>
+            Avg: {calculateAverage(movementDurationData, unit.movement_duration)} {unit.movement_duration}
+          </div>
           <button
             className='border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md'
             onClick={() => toggleUnit('movement_duration')}
@@ -149,7 +160,12 @@ const DriverStat = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) 
 
        {/* Speed Chart */}
        <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
+        <div className='flex flex-row justify-between items-center'>
+          <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
+          <div className='text-sm'>
+            Avg: {calculateAverage(speedData, 'km/h')} km/h
+          </div>
+        </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={speedData} onClick={handleChartClick}>
@@ -169,6 +185,9 @@ const DriverStat = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) 
       <div className="bg-white p-4 rounded-lg shadow">
         <div className='flex flex-row justify-between items-center'>
           <h2 className="text-lg font-semibold mb-4">Stoppage Duration</h2>
+          <div className='text-sm'>
+            Avg: {calculateAverage(stoppageDurationData, unit.stoppage_duration)} {unit.stoppage_duration}
+          </div>
           <button
             className='border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md'
             onClick={() => toggleUnit('stoppage_duration')}
@@ -194,6 +213,9 @@ const DriverStat = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) 
       <div className="bg-white p-4 rounded-lg shadow">
         <div className='flex flex-row justify-between items-center'>
           <h2 className="text-lg font-semibold mb-4">Idle Duration</h2>
+          <div className='text-sm'>
+            Avg: {calculateAverage(idleDurationData, unit.idle_duration)} {unit.idle_duration}
+          </div>
           <button
             className='border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md'
             onClick={() => toggleUnit('idle_duration')}
