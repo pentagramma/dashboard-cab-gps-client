@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  Text,
 } from 'recharts';
 import { GoogleMap, Marker, Polyline, LoadScript } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
@@ -35,6 +36,11 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
     },
     [tripsForSelectedMmiId]
   );
+
+  const calculateAverage = (data, key) => {
+    const total = data.reduce((acc, item) => acc + parseFloat(item[key]), 0);
+    return (total / data.length).toFixed(2);
+  };
 
   const distanceData = useMemo(() => aggregateData('distance', 'km'), [aggregateData]);
   const movementDurationData = useMemo(
@@ -102,12 +108,14 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
   };
 
   return (
-    
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-gray-200 font-englebert">
       {/* Distance Chart */}
       <div className="bg-white p-4 rounded-lg shadow flex-row">
         <div className='flex flex-row justify-between items-center'>
           <h2 className="text-lg font-semibold mb-4">Distance</h2>
+          <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
+            {`Avg: ${calculateAverage(distanceData, 'km')} km`}
+          </Text>
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
@@ -118,6 +126,9 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
               <Tooltip />
               <Legend />
               <Line type="monotone" dataKey="km" stroke="#8884d2" />
+              <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
+                {`Avg: ${calculateAverage(distanceData, 'km')} km`}
+              </Text>
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -133,6 +144,9 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
           >
             {unit.movement_duration === 's' ? 'Seconds' : 'Minutes'}
           </button>
+          <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
+            {`Avg: ${calculateAverage(movementDurationData, unit.movement_duration)} ${unit.movement_duration}`}
+          </Text>
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
@@ -143,14 +157,23 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
               <Tooltip />
               <Legend />
               <Bar dataKey={unit.movement_duration} fill="#FACA15" />
+              <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
+                {`Avg: ${calculateAverage(movementDurationData, unit.movement_duration)} ${unit.movement_duration}`}
+              </Text>
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-       {/* Speed Chart */}
-       <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
+      {/* Speed Chart */}
+      <div className="bg-white p-4 rounded-lg shadow">
+      <div className='flex flex-row justify-between items-center'>
+      <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
+        <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
+          {`Avg: ${calculateAverage(speedData, 'km/h')} km/h`}
+        </Text>
+        </div>
+        
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={speedData} onClick={handleChartClick}>
@@ -160,14 +183,17 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
               <Tooltip />
               <Legend />
               <Line type="monotone" dataKey="km/h" stroke="#E02424" />
+              <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
+                {`Avg: ${calculateAverage(speedData, 'km/h')} km/h`}
+              </Text>
             </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
      
 
-      {/* Stoppage Duration Chart */}
-      <div className="bg-white p-4 rounded-lg shadow">
+           {/* Stoppage Duration Chart */}
+           <div className="bg-white p-4 rounded-lg shadow">
         <div className='flex flex-row justify-between items-center'>
           <h2 className="text-lg font-semibold mb-4">Stoppage Duration</h2>
           <button
@@ -176,16 +202,22 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
           >
             {unit.stoppage_duration === 's' ? 'Seconds' : 'Minutes'}
           </button>
+          <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
+            {`Avg: ${calculateAverage(stoppageDurationData, unit.stoppage_duration)} ${unit.stoppage_duration}`}
+          </Text>
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stoppageDurationData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
-              <YAxis/>
+              <YAxis />
               <Tooltip />
               <Legend />
               <Bar dataKey={unit.stoppage_duration} fill="#1C64F2" />
+              <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
+                {`Avg: ${calculateAverage(stoppageDurationData, unit.stoppage_duration)} ${unit.stoppage_duration}`}
+              </Text>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -201,6 +233,9 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
           >
             {unit.idle_duration === 's' ? 'Seconds' : 'Minutes'}
           </button>
+          <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
+            {`Avg: ${calculateAverage(idleDurationData, unit.idle_duration)} ${unit.idle_duration}`}
+          </Text>
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
@@ -211,6 +246,9 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
               <Tooltip />
               <Legend />
               <Bar dataKey={unit.idle_duration} fill="#31C48D" />
+              <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
+                {`Avg: ${calculateAverage(idleDurationData, unit.idle_duration)} ${unit.idle_duration}`}
+              </Text>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -220,7 +258,7 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
       <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Start/Stop Location</h2>
         <div className="h-96">
-          <LoadScript googleMapsApiKey="AIzaSyCyaFfzx2egZfBNTFFXX3HRP-ypSBQhd28">
+          <LoadScript googleMapsApiKey="YOUR_API_KEY_HERE">
             <GoogleMap
               mapContainerStyle={{ width: '100%', height: '100%' }}
               zoom={10}
@@ -236,7 +274,6 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
                       }}
                       icon={{
                         url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                        
                       }}
                     />
                   )}
@@ -248,7 +285,6 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
                       }}
                       icon={{
                         url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                        
                       }}
                     />
                   )}
@@ -274,7 +310,6 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
         </div>
       </div>
     </div>
-    
   );
 };
 

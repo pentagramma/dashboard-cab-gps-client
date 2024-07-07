@@ -57,7 +57,7 @@ const Filters = ({ trips, selectedMetric, setSelectedMetric }) => {
   };
 
   return (
-    <div className='h-[40px] mt-2'>
+    <div className='h-[40px] mt-2 font-ruda'>
       <div className='flex flex-row justify-around items-center mx-[100px]'>
         <button
           className='border border-purple-800 p-2 rounded-full hover:text-yellow-400 hover:bg-purple-800'
