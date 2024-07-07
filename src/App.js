@@ -77,7 +77,14 @@ function App() {
         />
         <Route
           path="/driverstat/:mmiId"
-          element={<DriverStats selectedMmiId={selectedMmiId} rides={rides} />}
+          element={
+            <DriverStats
+              selectedMmiId={selectedMmiId}
+              rides={rides}
+              setSelectedTrip={setSelectedTrip}
+              setStartEndTime={setStartEndTime}
+            />
+          }
         />
       </Routes>
     </Router>
