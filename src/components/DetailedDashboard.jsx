@@ -84,6 +84,10 @@ const DetailedDashboard = ({ selectedTrip }) => {
                         lat: location.start_location.lat,
                         lng: location.start_location.long
                       }}
+                      icon={{
+                        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                        
+                      }}
                     />
                   )}
                   {location.end_location && (
@@ -91,6 +95,10 @@ const DetailedDashboard = ({ selectedTrip }) => {
                       position={{
                         lat: location.end_location.lat,
                         lng: location.end_location.long
+                      }}
+                      icon={{
+                        url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                        
                       }}
                     />
                   )}
