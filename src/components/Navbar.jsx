@@ -3,7 +3,7 @@ import { IoIosSearch } from "react-icons/io";
 import { IoHome } from "react-icons/io5";
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime, endTime, resetState }, ref) => {
+const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime, endTime, resetState, setSelectedMmiId }, ref) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMmiIds, setFilteredMmiIds] = useState([]);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -33,6 +33,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
     setSearchQuery(mmiId);
     handleMmiIdChange({ target: { value: mmiId } });
     setFilteredMmiIds([]);
+    setSelectedMmiId(mmiId);
     navigate(`/driverstat/${mmiId}`);
   };
 
@@ -49,6 +50,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
   };
 
   const handleSuggestionClick = (mmiId) => {
+    setSelectedMmiId(mmiId);
     handleMmiIdSelect(mmiId);
     inputRef.current.focus();
   };
@@ -59,6 +61,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
   };
 
   const isDetailedDashboard = location.pathname === '/details';
+  const isDriverStat = location.pathname.startsWith('/driverstat');
 
   return (
     <div ref={ref} className='w-full h-[70px] bg-purple-950 text-white flex items-center justify-between px-10 font-ruda'>
@@ -77,7 +80,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
         </div>
       )}
       <div className="text-center flex-grow">
-        {selectedMmiId && isDetailedDashboard && (
+        {selectedMmiId && (isDetailedDashboard || isDriverStat) && (
           <span className="text-xl font-semibold text-white mmid-show">
             Showing stats for MMI ID: <span className='text-yellow-400'>{selectedMmiId}</span>
           </span>
