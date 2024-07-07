@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
@@ -9,15 +9,23 @@ import { IoIosArrowBack } from "react-icons/io";
 const DetailedDashboard = ({ selectedTrip }) => {
   const navigate = useNavigate();
 
+  const [showMovementSeconds, setShowMovementSeconds] = useState(true);
+  const [showIdleSeconds, setShowIdleSeconds] = useState(true);
+  const [showStoppageSeconds, setShowStoppageSeconds] = useState(true);
+
   if (!selectedTrip) {
-    return <div className="w-[100%] h-screen bg-gray-200">No trip selected.</div>;
+    return <div className="w-full h-screen bg-gray-200">No trip selected.</div>;
   }
+
+  const convertToMinutes = (seconds) => {
+    return (seconds / 60).toFixed(2); // Convert seconds to minutes
+  };
 
   const data = [
     { name: 'Distance', value: selectedTrip.distance, unit: 'km' },
-    { name: 'Movement Duration', value: selectedTrip.movement_duration, unit: 's' },
-    { name: 'Idle Duration', value: selectedTrip.idle_duration, unit: 's' },
-    { name: 'Stoppage Duration', value: selectedTrip.stoppage_duration, unit: 's' },
+    { name: 'Movement Duration', value: showMovementSeconds ? selectedTrip.movement_duration : convertToMinutes(selectedTrip.movement_duration), unit: showMovementSeconds ? 's' : 'min' },
+    { name: 'Idle Duration', value: showIdleSeconds ? selectedTrip.idle_duration : convertToMinutes(selectedTrip.idle_duration), unit: showIdleSeconds ? 's' : 'min' },
+    { name: 'Stoppage Duration', value: showStoppageSeconds ? selectedTrip.stoppage_duration : convertToMinutes(selectedTrip.stoppage_duration), unit: showStoppageSeconds ? 's' : 'min' },
     { name: 'Average Speed', value: selectedTrip.average_speed, unit: 'km/h' }
   ];
 
@@ -36,47 +44,61 @@ const DetailedDashboard = ({ selectedTrip }) => {
     navigate('/');
   };
 
+  const toggleMovementSeconds = () => {
+    setShowMovementSeconds(!showMovementSeconds);
+  };
+
+  const toggleIdleSeconds = () => {
+    setShowIdleSeconds(!showIdleSeconds);
+  };
+
+  const toggleStoppageSeconds = () => {
+    setShowStoppageSeconds(!showStoppageSeconds);
+  };
+
   return (
-    <div className="w-[100%] h-[100%] bg-gray-200 p-4 grid grid-cols-3 gap-4 font-englebert">
+    <div className="w-full h-full bg-gray-200 p-4 grid grid-cols-1 lg:grid-cols-3 gap-4 font-englebert">
       <button
-        className='text-[20px] w-[90px] font-ruda font-bold border border-purple-950 hover:bg-purple-950 hover:text-white hover:scale-110 duration-300 text-center rounded-2xl pt-1 pr-1 flex items-center justify-center'
+        className='text-2xl w-24 font-ruda font-bold border border-purple-950 hover:bg-purple-950 hover:text-white hover:scale-110 duration-300 text-center rounded-2xl pt-1 pr-1 flex items-center justify-center'
         onClick={handleBackClick}
       >
-       <IoIosArrowBack /> BACK
+        <IoIosArrowBack /> BACK
       </button>
-      <div className="col-span-2 row-span-3 bg-white p-4 rounded-lg shadow-lg">
+      <div className="col-span-1 lg:col-span-2 row-span-3 bg-white p-4 rounded-lg shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Trip Map</h2>
-        <LoadScript googleMapsApiKey="AIzaSyCyaFfzx2egZfBNTFFXX3HRP-ypSBQhd28">
-          <GoogleMap
-            mapContainerStyle={{ width: '100%', height: '94%' }}
-            zoom={10}
-            center={{
-              lat: selectedTrip.drive_locations[0]?.start_location.lat || 0,
-              lng: selectedTrip.drive_locations[0]?.start_location.long || 0
-            }}
-          >
-            {selectedTrip.drive_locations.map((location, index) => (
-              <React.Fragment key={index}>
-                {location.start_location && (
-                  <Marker
-                    position={{
-                      lat: location.start_location.lat,
-                      lng: location.start_location.long
-                    }}
-                  />
-                )}
-                {location.end_location && (
-                  <Marker
-                    position={{
-                      lat: location.end_location.lat,
-                      lng: location.end_location.long
-                    }}
-                  />
-                )}
-              </React.Fragment>
-            ))}
-          </GoogleMap>
-        </LoadScript>
+        <div className="w-full h-96 lg:h-[94%]">
+          <LoadScript googleMapsApiKey="AIzaSyCyaFfzx2egZfBNTFFXX3HRP-ypSBQhd28">
+            <GoogleMap
+              mapContainerStyle={{ width: '100%', height: '100%' }}
+              zoom={10}
+              center={{
+                lat: selectedTrip.drive_locations[0]?.start_location.lat || 0,
+                lng: selectedTrip.drive_locations[0]?.start_location.long || 0
+              }}
+            >
+              {selectedTrip.drive_locations.map((location, index) => (
+                <React.Fragment key={index}>
+                  {location.start_location && (
+                    <Marker
+                      position={{
+                        lat: location.start_location.lat,
+                        lng: location.start_location.long
+                      }}
+                    />
+                  )}
+                  {location.end_location && (
+                    <Marker
+                      position={{
+                        lat: location.end_location.lat,
+                        lng: location.end_location.long
+                      }}
+                    />
+                  )}
+                </React.Fragment>
+              ))}
+            </GoogleMap>
+          </LoadScript>
+        </div>
       </div>
       <div className="bg-white p-4 rounded-lg shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Distance</h2>
@@ -87,12 +109,20 @@ const DetailedDashboard = ({ selectedTrip }) => {
             <YAxis />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Bar dataKey="value" fill="#0088FE" />
+            <Bar dataKey="value" fill="#BF125D" />
           </BarChart>
         </ResponsiveContainer>
       </div>
       <div className="bg-white p-4 rounded-lg shadow-lg">
-        <h2 className="text-lg font-semibold mb-4">Movement Duration</h2>
+        <div className='flex flex-row justify-between items-center'>
+          <h2 className="text-lg font-semibold mb-4">Movement Duration</h2>
+          <button
+            className='border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md'
+            onClick={toggleMovementSeconds}
+          >
+            {showMovementSeconds ? 'Seconds' : 'Minutes'}
+          </button>
+        </div>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={[data[1]]}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -105,7 +135,15 @@ const DetailedDashboard = ({ selectedTrip }) => {
         </ResponsiveContainer>
       </div>
       <div className="bg-white p-4 rounded-lg shadow-lg">
-        <h2 className="text-lg font-semibold mb-4">Idle Duration</h2>
+        <div className='flex flex-row justify-between items-center'>
+          <h2 className="text-lg font-semibold mb-4">Idle Duration</h2>
+          <button
+            className='border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md'
+            onClick={toggleIdleSeconds}
+          >
+            {showIdleSeconds ? 'Seconds' : 'Minutes'}
+          </button>
+        </div>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={[data[2]]}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -113,12 +151,20 @@ const DetailedDashboard = ({ selectedTrip }) => {
             <YAxis />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Bar dataKey="value" fill="#FFBB28" />
+            <Bar dataKey="value" fill="#1C64F2" />
           </BarChart>
         </ResponsiveContainer>
       </div>
       <div className="bg-white p-4 rounded-lg shadow-lg">
-        <h2 className="text-lg font-semibold mb-4">Stoppage Duration</h2>
+        <div className='flex flex-row justify-between items-center'>
+          <h2 className="text-lg font-semibold mb-4">Stoppage Duration</h2>
+          <button
+            className='border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md'
+            onClick={toggleStoppageSeconds}
+          >
+            {showStoppageSeconds ? 'Seconds' : 'Minutes'}
+          </button>
+        </div>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={[data[3]]}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -126,7 +172,7 @@ const DetailedDashboard = ({ selectedTrip }) => {
             <YAxis />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Bar dataKey="value" fill="#FF8042" />
+            <Bar dataKey="value" fill="#FACA15" />
           </BarChart>
         </ResponsiveContainer>
       </div>
