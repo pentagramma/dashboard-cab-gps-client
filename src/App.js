@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 import Header from "./components/Header";
 import DetailedDashboard from "./components/DetailedDashboard";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Filters from "./components/Filters";
 
 function App() {
   const [rides, setRides] = useState([]);
@@ -15,6 +16,8 @@ function App() {
     startTime: null,
     endTime: null,
   });
+  const [trips, setTrips] = useState([]); // Example state holding trips data
+  const [selectedMetric, setSelectedMetric] = useState("avgSpeed");
   const dashboardRef = useRef(null);
 
   const scrollToDashboard = () => {
@@ -49,6 +52,11 @@ function App() {
         rides={rides}
         startTime={startEndTime.startTime}
         endTime={startEndTime.endTime}
+      />
+      <Filters
+        trips={trips}
+        selectedMetric={selectedMetric}
+        setSelectedMetric={setSelectedMetric}
       />
       <Routes>
         <Route

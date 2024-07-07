@@ -101,11 +101,7 @@ const Dashboard = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) =
   };
 
   return (
-    <>
-    <div>
- <select name="" id=""></select>
- <select name="" id=""></select>
-    </div>
+    
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-gray-200 font-englebert">
       {/* Distance Chart */}
       <div className="bg-white p-4 rounded-lg shadow flex-row">
@@ -237,6 +233,10 @@ const Dashboard = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) =
                         lat: parseFloat(data.startLocation.split(',')[0]),
                         lng: parseFloat(data.startLocation.split(',')[1]),
                       }}
+                      icon={{
+                        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                        
+                      }}
                     />
                   )}
                   {data.stopLocation && (
@@ -244,6 +244,10 @@ const Dashboard = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) =
                       position={{
                         lat: parseFloat(data.stopLocation.split(',')[0]),
                         lng: parseFloat(data.stopLocation.split(',')[1]),
+                      }}
+                      icon={{
+                        url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                        
                       }}
                     />
                   )}
@@ -269,7 +273,7 @@ const Dashboard = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) =
         </div>
       </div>
     </div>
-    </>
+    
   );
 };
 

@@ -114,6 +114,19 @@ const DetailedDashboard = ({ selectedTrip }) => {
         </ResponsiveContainer>
       </div>
       <div className="bg-white p-4 rounded-lg shadow-lg">
+        <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={[data[4]]}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend />
+            <Bar dataKey="value" fill="#8884d8" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="bg-white p-4 rounded-lg shadow-lg">
         <div className='flex flex-row justify-between items-center'>
           <h2 className="text-lg font-semibold mb-4">Movement Duration</h2>
           <button
@@ -176,19 +189,7 @@ const DetailedDashboard = ({ selectedTrip }) => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow-lg">
-        <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={[data[4]]}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend />
-            <Bar dataKey="value" fill="#8884d8" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      
     </div>
   );
 };
