@@ -1,13 +1,15 @@
 import React, { useState, useEffect, forwardRef, useRef } from 'react';
 import { IoIosSearch } from "react-icons/io";
-import { useLocation } from 'react-router-dom';
+import { IoHome } from "react-icons/io5";
+import { useLocation, useNavigate } from 'react-router-dom';
 
-const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => {
+const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime, endTime }, ref) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMmiIds, setFilteredMmiIds] = useState([]);
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef(null);
   const location = useLocation(); // Get the current location
+  const navigate = useNavigate(); // Hook for navigation
 
   useEffect(() => {
     if (searchQuery) {
@@ -31,7 +33,6 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => 
     setSearchQuery(mmiId);
     handleMmiIdChange({ target: { value: mmiId } });
     setFilteredMmiIds([]);
-    // Navigate to dashboard with the selected MMI ID
   };
 
   const handleKeyPress = (e) => {
@@ -51,15 +52,29 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides }, ref) => 
     inputRef.current.focus();
   };
 
+  const handleHomeClick = () => {
+    navigate('/'); // Navigate to home page
+  };
+
   // Determine if the current path is the detailed dashboard path
   const isDetailedDashboard = location.pathname === '/details';
 
   return (
     <div ref={ref} className='w-full h-[70px] bg-purple-950 text-white flex items-center justify-between px-10 font-ruda'>
-      <div>
-        <h1>Start Time: </h1>
-        <h1>End Time: </h1>
+      <div className='mr-10 home-btn'>
+        <button
+          className='p-2 border-white border rounded-full text-[25px]'
+          onClick={handleHomeClick}
+        >
+          <IoHome />
+        </button>
       </div>
+      {isDetailedDashboard && (
+        <div>
+          <h1>Start Time: {new Date(startTime).toLocaleString()}</h1>
+          <h1>End Time: {new Date(endTime).toLocaleString()}</h1>
+        </div>
+      )}
       <div className="text-center flex-grow">
         {selectedMmiId && (
           <span className="text-xl font-semibold text-white">

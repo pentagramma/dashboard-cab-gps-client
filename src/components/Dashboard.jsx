@@ -14,7 +14,7 @@ import {
 import { GoogleMap, Marker, Polyline, LoadScript } from '@react-google-maps/api';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard = ({ rides, selectedMmiId, setSelectedTrip }) => {
+const Dashboard = ({ rides, selectedMmiId, setSelectedTrip, setStartEndTime }) => {
   const navigate = useNavigate();
   const [unit, setUnit] = useState({
     movement_duration: 's',
@@ -70,6 +70,7 @@ const Dashboard = ({ rides, selectedMmiId, setSelectedTrip }) => {
     if (data && data.activePayload) {
       const selectedTrip = tripsForSelectedMmiId[data.activePayload[0].payload.index - 1];
       setSelectedTrip(selectedTrip);
+      setStartEndTime({ startTime: selectedTrip.start_time, endTime: selectedTrip.end_time });
       navigate('/details');
     }
   };
@@ -100,6 +101,11 @@ const Dashboard = ({ rides, selectedMmiId, setSelectedTrip }) => {
   };
 
   return (
+    <>
+    <div>
+ <select name="" id=""></select>
+ <select name="" id=""></select>
+    </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 bg-gray-200 font-englebert">
       {/* Distance Chart */}
       <div className="bg-white p-4 rounded-lg shadow flex-row">
@@ -145,30 +151,23 @@ const Dashboard = ({ rides, selectedMmiId, setSelectedTrip }) => {
         </div>
       </div>
 
-      {/* Idle Duration Chart */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <div className='flex flex-row justify-between items-center'>
-          <h2 className="text-lg font-semibold mb-4">Idle Duration</h2>
-          <button
-            className='border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md'
-            onClick={() => toggleUnit('idle_duration')}
-          >
-            {unit.idle_duration === 's' ? 'Seconds' : 'Minutes'}
-          </button>
-        </div>
+       {/* Speed Chart */}
+       <div className="bg-white p-4 rounded-lg shadow">
+        <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={idleDurationData} onClick={handleChartClick}>
+            <LineChart data={speedData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
-              <YAxis {...getYAxisProps('idle_duration')} />
+              <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey={unit.idle_duration} fill="#31C48D" />
-            </BarChart>
+              <Line type="monotone" dataKey="km/h" stroke="#E02424" />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       </div>
+     
 
       {/* Stoppage Duration Chart */}
       <div className="bg-white p-4 rounded-lg shadow">
@@ -195,19 +194,27 @@ const Dashboard = ({ rides, selectedMmiId, setSelectedTrip }) => {
         </div>
       </div>
 
-      {/* Speed Chart */}
+      {/* Idle Duration Chart */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
+        <div className='flex flex-row justify-between items-center'>
+          <h2 className="text-lg font-semibold mb-4">Idle Duration</h2>
+          <button
+            className='border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md'
+            onClick={() => toggleUnit('idle_duration')}
+          >
+            {unit.idle_duration === 's' ? 'Seconds' : 'Minutes'}
+          </button>
+        </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={speedData} onClick={handleChartClick}>
+            <BarChart data={idleDurationData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
-              <YAxis />
+              <YAxis {...getYAxisProps('idle_duration')} />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="km/h" stroke="#E02424" />
-            </LineChart>
+              <Bar dataKey={unit.idle_duration} fill="#31C48D" />
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -262,6 +269,7 @@ const Dashboard = ({ rides, selectedMmiId, setSelectedTrip }) => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
