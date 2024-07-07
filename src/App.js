@@ -38,6 +38,11 @@ function App() {
     };
     fetchRides();
   }, []);
+  const resetState = () => {
+    setSelectedMmiId(null);
+
+    // Refetch or reset rides if needed
+  };
 
   const handleMmiIdChange = (event) => {
     setSelectedMmiId(event.target.value);
@@ -49,11 +54,13 @@ function App() {
       <Navbar
         selectedMmiId={selectedMmiId}
         ref={dashboardRef}
-        handleMmiIdChange={handleMmiIdChange}
+        // handleMmiIdChange={handleMmiIdChange}
         rides={rides}
         startTime={startEndTime.startTime}
         endTime={startEndTime.endTime}
         setSelectedMmiId={setSelectedMmiId}
+        resetState={resetState}
+        handleMmiIdChange={(e) => setSelectedMmiId(e.target.value)}
       />
       <Filters
         trips={trips}

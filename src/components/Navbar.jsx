@@ -3,7 +3,7 @@ import { IoIosSearch } from "react-icons/io";
 import { IoHome } from "react-icons/io5";
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime, endTime }, ref) => {
+const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime, endTime, resetState }, ref) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredMmiIds, setFilteredMmiIds] = useState([]);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -54,6 +54,7 @@ const Navbar = forwardRef(({ selectedMmiId, handleMmiIdChange, rides, startTime,
   };
 
   const handleHomeClick = () => {
+    resetState(); // Reset the state when navigating home
     navigate('/');
   };
 
