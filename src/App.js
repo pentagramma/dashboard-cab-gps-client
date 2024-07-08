@@ -8,6 +8,7 @@ import DetailedDashboard from "./components/DetailedDashboard";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Filters from "./components/Filters";
 import DriverStats from "./components/DriverStats";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 function App() {
   const [rides, setRides] = useState([]);
@@ -17,8 +18,10 @@ function App() {
     startTime: null,
     endTime: null,
   });
-  const [trips, setTrips] = useState([]); // Example state holding trips data
+
+  const [trips, setTrips] = useState([]);
   const [selectedMetric, setSelectedMetric] = useState("avgSpeed");
+  const [loading, setLoading] = useState(true); // Loading state
   const dashboardRef = useRef(null);
 
   const scrollToDashboard = () => {
@@ -29,11 +32,14 @@ function App() {
 
   useEffect(() => {
     const fetchRides = async () => {
+      setLoading(true); // Set loading to true when fetching starts
       try {
         const response = await axios.get("http://localhost:5000/api/rides");
         setRides(response.data);
+        setLoading(false); // Set loading to false when fetching ends
       } catch (error) {
         console.error("Error fetching rides data:", error);
+        setLoading(false); // Set loading to false in case of error
       }
     };
     fetchRides();
@@ -41,7 +47,6 @@ function App() {
 
   const resetState = () => {
     setSelectedMmiId(null);
-
     // Refetch or reset rides if needed
   };
 
@@ -62,37 +67,42 @@ function App() {
         trips={trips}
         selectedMetric={selectedMetric}
         setSelectedMetric={setSelectedMetric}
+        setSelectedTrip={setSelectedTrip}
       />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Dashboard
-              selectedMmiId={selectedMmiId}
-              setSelectedMmiId={setSelectedMmiId}
-              rides={rides}
-              setSelectedTrip={setSelectedTrip}
-              setStartEndTime={setStartEndTime}
-            />
-          }
-        />
-        <Route
-          path="/details"
-          element={<DetailedDashboard selectedTrip={selectedTrip} />}
-        />
-        <Route
-          path="/driverstat/:mmiId"
-          element={
-            <DriverStats
-              selectedMmiId={selectedMmiId}
-              rides={rides}
-              setSelectedTrip={setSelectedTrip}
-              setStartEndTime={setStartEndTime}
-              setSelectedMmiId={setSelectedMmiId}
-            />
-          }
-        />
-      </Routes>
+      {loading ? (
+        <LoadingSpinner />
+      ) : (
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Dashboard
+                selectedMmiId={selectedMmiId}
+                setSelectedMmiId={setSelectedMmiId}
+                rides={rides}
+                setSelectedTrip={setSelectedTrip}
+                setStartEndTime={setStartEndTime}
+              />
+            }
+          />
+          <Route
+            path="/details"
+            element={<DetailedDashboard selectedTrip={selectedTrip} />}
+          />
+          <Route
+            path="/driverstat/:mmiId"
+            element={
+              <DriverStats
+                selectedMmiId={selectedMmiId}
+                rides={rides}
+                setSelectedTrip={setSelectedTrip}
+                setStartEndTime={setStartEndTime}
+                setSelectedMmiId={setSelectedMmiId}
+              />
+            }
+          />
+        </Routes>
+      )}
     </Router>
   );
 }

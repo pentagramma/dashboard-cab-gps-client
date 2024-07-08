@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useNavigate } from 'react-router-dom';
 
-const Filters = ({ trips, selectedMetric, setSelectedMetric }) => {
+const Filters = ({ trips, selectedMetric, setSelectedMetric, setSelectedTrip }) => {
   const [sortOrder, setSortOrder] = useState('lowToHigh');
   const [sortedTrips, setSortedTrips] = useState([]);
   const [filtersReady, setFiltersReady] = useState(false); // State to track if both filters are selected
+  const [currentTripIndex, setCurrentTripIndex] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,17 +43,33 @@ const Filters = ({ trips, selectedMetric, setSelectedMetric }) => {
     setSelectedMetric(e.target.value);
   };
 
+  const handleTripChange = (index) => {
+    setCurrentTripIndex(index);
+    const selectedTrip = sortedTrips[index];
+    setSelectedTrip(selectedTrip);
+    navigate(`/details/${selectedTrip.mmi_id}`);
+  };
+
   const handleNextClick = () => {
-    // Navigate to details page if both filters are selected
+    // Navigate to next trip if both filters are selected
     if (filtersReady && sortedTrips.length > 0) {
-      navigate(`/details/${sortedTrips[0].mmi_id}`);
+      const nextIndex = (currentTripIndex + 1) % sortedTrips.length;
+      handleTripChange(nextIndex);
     }
   };
 
   const handlePrevClick = () => {
-    // Navigate to details page if both filters are selected
+    // Navigate to previous trip if both filters are selected
     if (filtersReady && sortedTrips.length > 0) {
-      navigate(`/details/${sortedTrips[sortedTrips.length - 1].mmi_id}`);
+      const prevIndex = (currentTripIndex - 1 + sortedTrips.length) % sortedTrips.length;
+      handleTripChange(prevIndex);
+    }
+  };
+
+  const handleSearchClick = () => {
+    // Navigate to details page with the first trip if both filters are selected
+    if (filtersReady && sortedTrips.length > 0) {
+      handleTripChange(0);
     }
   };
 
@@ -60,7 +77,7 @@ const Filters = ({ trips, selectedMetric, setSelectedMetric }) => {
     <div className='h-[40px] mt-2 font-ruda'>
       <div className='flex flex-row justify-around items-center mx-[100px]'>
         <button
-          className='border border-purple-800 p-2 rounded-full hover:text-yellow-400 hover:bg-purple-800'
+          className='border border-purple-800 p-2 rounded-full hover:text-white hover:bg-purple-800'
           onClick={handlePrevClick}
           disabled={!filtersReady || sortedTrips.length === 0}
         >
@@ -89,9 +106,15 @@ const Filters = ({ trips, selectedMetric, setSelectedMetric }) => {
           <option value="distance">Distance</option>
           <option value="movementDuration">Movement Duration</option>
         </select>
+        <button
+          className='p-1 border border-purple-800 rounded-md hover:bg-purple-800 hover:text-white'
+          onClick={handleSearchClick}
+        >
+          Search
+        </button>
 
         <button
-          className='border border-purple-800 p-2 rounded-full hover:text-yellow-400 hover:bg-purple-800'
+          className='border border-purple-800 p-2 rounded-full hover:text-white hover:bg-purple-800'
           onClick={handleNextClick}
           disabled={!filtersReady || sortedTrips.length === 0}
         >
