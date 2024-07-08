@@ -6,7 +6,7 @@ import Navbar from "./components/Navbar";
 import Header from "./components/Header";
 import DetailedDashboard from "./components/DetailedDashboard";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Filters from "./components/Filters";
+
 import DriverStats from "./components/DriverStats";
 import LoadingSpinner from "./components/LoadingSpinner";
 
@@ -63,12 +63,12 @@ function App() {
         resetState={resetState}
         handleMmiIdChange={(e) => setSelectedMmiId(e.target.value)}
       />
-      <Filters
+      {/* <Filters
         trips={trips}
         selectedMetric={selectedMetric}
         setSelectedMetric={setSelectedMetric}
         setSelectedTrip={setSelectedTrip}
-      />
+      /> */}
       {loading ? (
         <LoadingSpinner />
       ) : (
