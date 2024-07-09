@@ -34,7 +34,9 @@ function App() {
     const fetchRides = async () => {
       setLoading(true); // Set loading to true when fetching starts
       try {
-        const response = await axios.get("http://localhost:4001/api/rides");
+        const response = await axios.get(
+          "https://embifi-backend.onrender.com/api/rides"
+        );
         setRides(response.data);
         setLoading(false); // Set loading to false when fetching ends
       } catch (error) {
