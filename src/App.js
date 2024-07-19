@@ -6,7 +6,7 @@ import Navbar from "./components/Navbar";
 import Header from "./components/Header";
 import DetailedDashboard from "./components/DetailedDashboard";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
+import RIDES_DATA from "./General";
 import DriverStats from "./components/DriverStats";
 import LoadingSpinner from "./components/LoadingSpinner";
 
@@ -34,10 +34,8 @@ function App() {
     const fetchRides = async () => {
       setLoading(true); // Set loading to true when fetching starts
       try {
-        const response = await axios.get(
-          "https://embifi-backend.onrender.com/api/rides"
-        );
-        setRides(response.data);
+        // Using the sample data for testing instead of an API call
+        setRides(RIDES_DATA);
         setLoading(false); // Set loading to false when fetching ends
       } catch (error) {
         console.error("Error fetching rides data:", error);
@@ -46,6 +44,23 @@ function App() {
     };
     fetchRides();
   }, []);
+
+  // useEffect(() => {
+  //   const fetchRides = async () => {
+  //     setLoading(true); // Set loading to true when fetching starts
+  //     try {
+  //       const response = await axios.get(
+  //         "https://embifi-backend.onrender.com/api/rides"
+  //       );
+  //       setRides(response.data);
+  //       setLoading(false); // Set loading to false when fetching ends
+  //     } catch (error) {
+  //       console.error("Error fetching rides data:", error);
+  //       setLoading(false); // Set loading to false in case of error
+  //     }
+  //   };
+  //   fetchRides();
+  // }, []);
 
   const resetState = () => {
     setSelectedMmiId(null);

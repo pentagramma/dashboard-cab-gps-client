@@ -255,7 +255,7 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
       </div>
 
       {/* Start/Stop Location Chart */}
-      <div className="bg-white p-4 rounded-lg shadow">
+      {/* <div className="bg-white p-4 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Start/Stop Location</h2>
         <div className="h-96">
           <LoadScript googleMapsApiKey="AIzaSyCyaFfzx2egZfBNTFFXX3HRP-ypSBQhd28">
@@ -308,7 +308,7 @@ const Dashboard = ({ rides, setSelectedMmiId, selectedMmiId, setSelectedTrip, se
             </GoogleMap>
           </LoadScript>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

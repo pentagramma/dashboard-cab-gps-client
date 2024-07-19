@@ -3,6 +3,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { GoogleMap, Marker, LoadScript } from '@react-google-maps/api';
+import GoogleMapReact from 'google-map-react';
 import { useNavigate } from 'react-router-dom';
 import { IoIosArrowBack } from "react-icons/io";
 
@@ -62,7 +63,7 @@ const DetailedDashboard = ({ selectedTrip }) => {
       <div className="col-span-1 lg:col-span-2 row-span-3 bg-white p-4 rounded-lg shadow-lg">
       <h2 className="text-lg font-semibold mb-4">Trip Map</h2>
         <div className="w-full h-96 lg:h-[94%]">
-          <LoadScript googleMapsApiKey="AIzaSyCyaFfzx2egZfBNTFFXX3HRP-ypSBQhd28">
+          <LoadScript googleMapsApiKey="AIzaSyBE3J5p9S6xy006V8yVE_6Fw49nExSlSxs">
             <GoogleMap
               mapContainerStyle={{ width: '100%', height: '100%' }}
               zoom={10}
