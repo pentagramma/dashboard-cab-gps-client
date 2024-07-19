@@ -15,11 +15,16 @@ const DetailedDashboard = ({ selectedTrip }) => {
   const [showStoppageSeconds, setShowStoppageSeconds] = useState(true);
 
   if (!selectedTrip) {
-    return <div className="w-full h-screen bg-gray-200">No trip selected.</div>;
+    return <div className="w-full h-screen bg-gray-200 flex items-center justify-center font-ruda">No trip selected.</div>;
   }
 
   const convertToMinutes = (seconds) => {
     return (seconds / 60).toFixed(2); // Convert seconds to minutes
+  };
+
+  const markerPosition = {
+    lat: -3.745,
+    lng: -38.523
   };
 
   const data = [
@@ -68,34 +73,42 @@ const DetailedDashboard = ({ selectedTrip }) => {
               mapContainerStyle={{ width: '100%', height: '100%' }}
               zoom={10}
               center={{
-                lat: selectedTrip.drive_locations[0]?.start_location.lat || 0,
-                lng: selectedTrip.drive_locations[0]?.start_location.long || 0
+                lat: 
+                // selectedTrip.drive_locations[0]?.start_location.lat || 0,
+                -3.745,
+
+                 lng: 
+                //  selectedTrip.drive_locations[0]?.start_location.long || 0 
+                -38.523
               }}
+              
             >
               {selectedTrip.drive_locations.map((location, index) => (
   <React.Fragment key={index}>
     {location.start_location && (
       <Marker
-        position={{
-          lat: location.start_location.lat,
-          lng: location.start_location.long
-        }}
+        position={
+          // lat: location.start_location.lat,
+          // lng: location.start_location.long
+          markerPosition
+        }
         icon={{
           url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
         }}
       />
     )}
-    {location.end_location && (
-      <Marker
-        position={{
-          lat: location.end_location.lat,
-          lng: location.end_location.long
-        }}
-        icon={{
-          url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-        }}
-      />
-    )}
+      {/* {location.end_location && (
+      // <Marker
+      //   position={{
+      //     lat: location.end_location.lat,
+      //     lng: location.end_location.long
+      //   }}
+      //   icon={{
+      //     url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+      //   }}
+      // />
+
+//    )} */}
   </React.Fragment>
 ))}
             </GoogleMap>

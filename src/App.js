@@ -102,6 +102,7 @@ function App() {
               />
             }
           />
+
           <Route
             path="/details"
             element={<DetailedDashboard selectedTrip={selectedTrip} />}
