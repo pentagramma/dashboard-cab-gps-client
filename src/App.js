@@ -9,6 +9,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import RIDES_DATA from "./General";
 import DriverStats from "./components/DriverStats";
 import LoadingSpinner from "./components/LoadingSpinner";
+import { format } from "date-fns";
 
 function App() {
   const [rides, setRides] = useState([]);
@@ -30,12 +31,54 @@ function App() {
     }
   };
 
+  const formatRidesData = (rides) => {
+    return rides.map((ride) => {
+      let recordDate;
+      if (
+        ride.record_date &&
+        typeof ride.record_date === "object" &&
+        "$numberLong" in ride.record_date
+      ) {
+        recordDate = parseInt(ride.record_date.$numberLong, 10);
+      } else {
+        // Fallback to assuming it's already a plain number
+        recordDate = parseInt(ride.record_date, 10);
+      }
+
+      // Return the formatted ride object
+      return {
+        ...ride,
+        record_date: recordDate, // Use the timestamp directly
+      };
+    });
+  };
+
+  const transformDataByDate = (rides) => {
+    const dateGroups = rides.reduce((acc, ride) => {
+      const date = ride.record_date;
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(ride);
+      return acc;
+    }, {});
+
+    return Object.keys(dateGroups).map((date) => ({
+      record_date: date,
+      trips: dateGroups[date].length,
+    }));
+  };
+
+  // Example usage
+  const formattedData = transformDataByDate(RIDES_DATA);
+
   useEffect(() => {
     const fetchRides = async () => {
       setLoading(true); // Set loading to true when fetching starts
       try {
         // Using the sample data for testing instead of an API call
-        setRides(RIDES_DATA);
+        const formattedRides = formatRidesData(RIDES_DATA);
+        setRides(formattedRides);
         setLoading(false); // Set loading to false when fetching ends
       } catch (error) {
         console.error("Error fetching rides data:", error);
@@ -99,6 +142,8 @@ function App() {
                 rides={rides}
                 setSelectedTrip={setSelectedTrip}
                 setStartEndTime={setStartEndTime}
+                formattedData={formattedData}
+                data={RIDES_DATA}
               />
             }
           />
