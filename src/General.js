@@ -88,6 +88,108 @@ export const RIDES_DATA = [
     },
   },
   {
+    _id: "660fd548304818d7cf350007",
+    mmi_id: "5414182",
+    start_time: 1704871085000,
+    end_time: 1704897891000,
+    distance: 55.66,
+    movement_duration: 9778,
+    idle_duration: 14011,
+    stoppage_duration: 9,
+    average_speed: 7,
+    drive_locations: [
+      {
+        _id: "669b4454d241ba40be01184a",
+        start_location: [
+          {
+            _id: "669b4454d241ba40be01184b",
+            lat: 26.8586872222222,
+            long: 82.2211405555556,
+          },
+        ],
+        end_location: [
+          {
+            _id: "669b4454d241ba40be01184c",
+            lat: 26.809695,
+            long: 82.2069433333333,
+          },
+        ],
+      },
+      {
+        _id: "669b4454d241ba40be01184d",
+        start_location: [
+          {
+            _id: "669b4454d241ba40be01184e",
+            lat: 26.8097455555556,
+            long: 82.2068933333333,
+          },
+        ],
+        end_location: [
+          {
+            _id: "669b4454d241ba40be01184f",
+            lat: 26.8464255555556,
+            long: 82.2055233333333,
+          },
+        ],
+      },
+      {
+        _id: "669b4454d241ba40be011850",
+        start_location: [
+          {
+            _id: "669b4454d241ba40be011851",
+            lat: 26.8463511111111,
+            long: 82.2054316666667,
+          },
+        ],
+        end_location: [
+          {
+            _id: "669b4454d241ba40be011852",
+            lat: 26.8462866666667,
+            long: 82.2024944444444,
+          },
+        ],
+      },
+      {
+        _id: "669b4454d241ba40be011853",
+        start_location: [
+          {
+            _id: "669b4454d241ba40be011854",
+            lat: 26.8462877777778,
+            long: 82.2024944444444,
+          },
+        ],
+        end_location: [
+          {
+            _id: "669b4454d241ba40be011855",
+            lat: 26.8455022222222,
+            long: 82.2110922222222,
+          },
+        ],
+      },
+      {
+        _id: "669b4454d241ba40be011856",
+        start_location: [
+          {
+            _id: "669b4454d241ba40be011857",
+            lat: 26.8455205555556,
+            long: 82.2111388888889,
+          },
+        ],
+        end_location: [
+          {
+            _id: "669b4454d241ba40be011858",
+            lat: 26.85891,
+            long: 82.221065,
+          },
+        ],
+      },
+    ],
+    record_date: 1704825000000,
+    __v: 0,
+    createdAt: "2024-04-05T10:41:13.623Z",
+    updatedAt: "2024-04-05T10:41:13.623Z",
+  },
+  {
     _id: {
       $oid: "660fd536304818d7cf34f6e6",
     },
@@ -374,108 +476,6 @@ export const RIDES_DATA = [
     updatedAt: {
       $date: "2024-04-05T10:40:54.879Z",
     },
-  },
-  {
-    _id: "660fd548304818d7cf350007",
-    mmi_id: "5414182",
-    start_time: 1704871085000,
-    end_time: 1704897891000,
-    distance: 55.66,
-    movement_duration: 9778,
-    idle_duration: 14011,
-    stoppage_duration: 9,
-    average_speed: 7,
-    drive_locations: [
-      {
-        _id: "669b4454d241ba40be01184a",
-        start_location: [
-          {
-            _id: "669b4454d241ba40be01184b",
-            lat: 26.8586872222222,
-            long: 82.2211405555556,
-          },
-        ],
-        end_location: [
-          {
-            _id: "669b4454d241ba40be01184c",
-            lat: 26.809695,
-            long: 82.2069433333333,
-          },
-        ],
-      },
-      {
-        _id: "669b4454d241ba40be01184d",
-        start_location: [
-          {
-            _id: "669b4454d241ba40be01184e",
-            lat: 26.8097455555556,
-            long: 82.2068933333333,
-          },
-        ],
-        end_location: [
-          {
-            _id: "669b4454d241ba40be01184f",
-            lat: 26.8464255555556,
-            long: 82.2055233333333,
-          },
-        ],
-      },
-      {
-        _id: "669b4454d241ba40be011850",
-        start_location: [
-          {
-            _id: "669b4454d241ba40be011851",
-            lat: 26.8463511111111,
-            long: 82.2054316666667,
-          },
-        ],
-        end_location: [
-          {
-            _id: "669b4454d241ba40be011852",
-            lat: 26.8462866666667,
-            long: 82.2024944444444,
-          },
-        ],
-      },
-      {
-        _id: "669b4454d241ba40be011853",
-        start_location: [
-          {
-            _id: "669b4454d241ba40be011854",
-            lat: 26.8462877777778,
-            long: 82.2024944444444,
-          },
-        ],
-        end_location: [
-          {
-            _id: "669b4454d241ba40be011855",
-            lat: 26.8455022222222,
-            long: 82.2110922222222,
-          },
-        ],
-      },
-      {
-        _id: "669b4454d241ba40be011856",
-        start_location: [
-          {
-            _id: "669b4454d241ba40be011857",
-            lat: 26.8455205555556,
-            long: 82.2111388888889,
-          },
-        ],
-        end_location: [
-          {
-            _id: "669b4454d241ba40be011858",
-            lat: 26.85891,
-            long: 82.221065,
-          },
-        ],
-      },
-    ],
-    record_date: 1704825000000,
-    __v: 0,
-    createdAt: "2024-04-05T10:41:13.623Z",
-    updatedAt: "2024-04-05T10:41:13.623Z",
   },
   {
     _id: "660fd548304818d7cf350007",

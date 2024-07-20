@@ -7,19 +7,12 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
   Legend,
   ResponsiveContainer,
-  Text,
 } from "recharts";
-import {
-  GoogleMap,
-  Marker,
-  Polyline,
-  LoadScript,
-} from "@react-google-maps/api";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import CustomTooltip from "./CustomTooltip";
 
 const Dashboard = ({
   rides,
@@ -27,7 +20,6 @@ const Dashboard = ({
   selectedMmiId,
   setSelectedTrip,
   setStartEndTime,
-  RIDES_DATA,
 }) => {
   const navigate = useNavigate();
   const [unit, setUnit] = useState({
@@ -44,11 +36,14 @@ const Dashboard = ({
 
   const aggregateData = useCallback(
     (key, label, conversion) => {
-      return tripsForSelectedMmiId.map((ride, index) => ({
+      const data = tripsForSelectedMmiId.map((ride, index) => ({
         index: index + 1,
         [label]: conversion ? (ride[key] / 60).toFixed(2) : ride[key],
-        record_date: ride.record_date, // Include record_date
+        record_date: ride.record_date,
       }));
+      return data.sort(
+        (a, b) => new Date(a.record_date) - new Date(b.record_date)
+      );
     },
     [tripsForSelectedMmiId]
   );
@@ -58,11 +53,34 @@ const Dashboard = ({
     return (total / data.length).toFixed(2);
   };
 
+  const aggregateByDate = (data) => {
+    const dateMap = data.reduce((acc, ride) => {
+      const dateKey = new Date(ride.record_date).toISOString().split("T")[0];
+      if (!acc[dateKey]) {
+        acc[dateKey] = { totalDistance: 0, count: 0 };
+      }
+      acc[dateKey].totalDistance += parseFloat(ride.km);
+      acc[dateKey].count += 1;
+      return acc;
+    }, {});
+
+    return Object.entries(dateMap)
+      .map(([date, { totalDistance, count }]) => ({
+        date,
+        averageDistance: (totalDistance / count).toFixed(2),
+      }))
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  };
+
   const distanceData = useMemo(
     () => aggregateData("distance", "km"),
     [aggregateData]
   );
-  console.log(distanceData);
+
+  const distanceDataAggregated = useMemo(
+    () => aggregateByDate(distanceData),
+    [distanceData]
+  );
 
   const movementDurationData = useMemo(
     () =>
@@ -96,29 +114,27 @@ const Dashboard = ({
     [aggregateData]
   );
 
-  const startStopLocationData = useMemo(() => {
-    return tripsForSelectedMmiId.map((ride, index) => ({
-      index: index + 1,
-      startLocation: ride.drive_locations[0]
-        ? `${ride.drive_locations[0].start_location.lat},${ride.drive_locations[0].start_location.long}`
-        : null,
-      stopLocation:
-        ride.drive_locations.length > 0
-          ? `${
-              ride.drive_locations[ride.drive_locations.length - 1].end_location
-                .lat
-            },${
-              ride.drive_locations[ride.drive_locations.length - 1].end_location
-                .long
-            }`
-          : null,
-    }));
-  }, [tripsForSelectedMmiId]);
-
-  const xAxisTicks = useMemo(
-    () => Array.from({ length: 8 }, (_, i) => (i + 1) * 5),
-    []
-  );
+  // const startStopLocationData = useMemo(() => {
+  //   const data = tripsForSelectedMmiId.map((ride, index) => ({
+  //     index: index + 1,
+  //     startLocation: ride.drive_locations[0]
+  //       ? `${ride.drive_locations[0].start_location.lat},${ride.drive_locations[0].start_location.long}`
+  //       : null,
+  //     stopLocation:
+  //       ride.drive_locations.length > 0
+  //         ? `${
+  //             ride.drive_locations[ride.drive_locations.length - 1].end_location
+  //               .lat
+  //           },${
+  //             ride.drive_locations[ride.drive_locations.length - 1].end_location
+  //               .long
+  //           }`
+  //         : null,
+  //   }));
+  //   return data.sort(
+  //     (a, b) => new Date(a.record_date) - new Date(b.record_date)
+  //   );
+  // }, [tripsForSelectedMmiId]);
 
   const handleChartClick = (data) => {
     if (data && data.activePayload) {
@@ -134,16 +150,9 @@ const Dashboard = ({
     }
   };
 
-  const validLocations = startStopLocationData.filter(
-    (data) => data.startLocation || data.stopLocation
-  );
-  const initialCenter =
-    validLocations.length > 0
-      ? {
-          lat: parseFloat(validLocations[0].startLocation.split(",")[0]),
-          lng: parseFloat(validLocations[0].startLocation.split(",")[1]),
-        }
-      : { lat: 0, lng: 0 };
+  // const validLocations = startStopLocationData.filter(
+  //   (data) => data.startLocation || data.stopLocation
+  // );
 
   const toggleUnit = (key) => {
     setUnit((prevUnit) => ({
@@ -164,7 +173,6 @@ const Dashboard = ({
 
   const tickFormatter = (timestamp) => {
     try {
-      // Check if timestamp is an object and has a $numberLong property
       let date;
       if (
         typeof timestamp === "object" &&
@@ -188,16 +196,23 @@ const Dashboard = ({
       <div className="bg-white p-4 rounded-lg shadow flex-row">
         <div className="flex flex-row justify-between items-center">
           <h2 className="text-lg font-semibold mb-4">Distance</h2>
-          <span>{`Avg: ${calculateAverage(distanceData, "km")} km`}</span>
+          <span>{`Avg: ${calculateAverage(
+            distanceDataAggregated,
+            "averageDistance"
+          )} km`}</span>
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={distanceData}>
+            <LineChart data={distanceDataAggregated}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="record_date" tickFormatter={tickFormatter} />
+              <XAxis dataKey="date" tickFormatter={tickFormatter} />
               <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="km" stroke="#8884d8" />
+              <CustomTooltip />
+              <Line
+                type="monotone"
+                dataKey="averageDistance"
+                stroke="#8884d8"
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -213,33 +228,16 @@ const Dashboard = ({
           >
             {unit.movement_duration === "s" ? "Seconds" : "Minutes"}
           </button>
-          <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
-            {`Avg: ${calculateAverage(
-              movementDurationData,
-              unit.movement_duration
-            )} ${unit.movement_duration}`}
-          </Text>
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={movementDurationData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
+              <XAxis dataKey="record_date" tickFormatter={tickFormatter} />
               <YAxis {...getYAxisProps("movement_duration")} />
-              <Tooltip />
+              <CustomTooltip />
               <Legend />
               <Bar dataKey={unit.movement_duration} fill="#FACA15" />
-              <Text
-                x="50%"
-                y="20"
-                textAnchor="middle"
-                dominantBaseline="middle"
-              >
-                {`Avg: ${calculateAverage(
-                  movementDurationData,
-                  unit.movement_duration
-                )} ${unit.movement_duration}`}
-              </Text>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -248,95 +246,18 @@ const Dashboard = ({
       {/* Speed Chart */}
       <div className="bg-white p-4 rounded-lg shadow">
         <div className="flex flex-row justify-between items-center">
-          <h2 className="text-lg font-semibold mb-4">Average Speed</h2>
-          <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
-            {`Avg: ${calculateAverage(speedData, "km/h")} km/h`}
-          </Text>
+          <h2 className="text-lg font-semibold mb-4">Speed</h2>
+          <span>{`Avg: ${calculateAverage(speedData, "km/h")} km/h`}</span>
         </div>
-
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={speedData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
+              <XAxis dataKey="record_date" tickFormatter={tickFormatter} />
               <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="km/h" stroke="#E02424" />
-              <Text
-                x="50%"
-                y="20"
-                textAnchor="middle"
-                dominantBaseline="middle"
-              >
-                {`Avg: ${calculateAverage(speedData, "km/h")} km/h`}
-              </Text>
+              <CustomTooltip />
+              <Line type="monotone" dataKey="km/h" stroke="#4caf50" />
             </LineChart>
-
-            {/* <PieChart width={730} height={250}>
-              <Pie
-                data={data01}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={50}
-                fill="#8884d8"
-              />
-              <Pie
-                data={data02}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                fill="#82ca9d"
-                label
-              />
-            </PieChart> */}
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Stoppage Duration Chart */}
-      <div className="bg-white p-4 rounded-lg shadow">
-        <div className="flex flex-row justify-between items-center">
-          <h2 className="text-lg font-semibold mb-4">Stoppage Duration</h2>
-          <button
-            className="border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md"
-            onClick={() => toggleUnit("stoppage_duration")}
-          >
-            {unit.stoppage_duration === "s" ? "Seconds" : "Minutes"}
-          </button>
-          <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
-            {`Avg: ${calculateAverage(
-              stoppageDurationData,
-              unit.stoppage_duration
-            )} ${unit.stoppage_duration}`}
-          </Text>
-        </div>
-        <div className="h-96">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={stoppageDurationData} onClick={handleChartClick}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey={unit.stoppage_duration} fill="#1C64F2" />
-              <Text
-                x="50%"
-                y="20"
-                textAnchor="middle"
-                dominantBaseline="middle"
-              >
-                {`Avg: ${calculateAverage(
-                  stoppageDurationData,
-                  unit.stoppage_duration
-                )} ${unit.stoppage_duration}`}
-              </Text>
-            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -351,92 +272,66 @@ const Dashboard = ({
           >
             {unit.idle_duration === "s" ? "Seconds" : "Minutes"}
           </button>
-          <Text x="50%" y="20" textAnchor="middle" dominantBaseline="middle">
-            {`Avg: ${calculateAverage(idleDurationData, unit.idle_duration)} ${
-              unit.idle_duration
-            }`}
-          </Text>
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={idleDurationData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" ticks={xAxisTicks} domain={[1, 40]} />
+              <XAxis dataKey="record_date" tickFormatter={tickFormatter} />
               <YAxis {...getYAxisProps("idle_duration")} />
-              <Tooltip />
+              <CustomTooltip />
               <Legend />
-              <Bar dataKey={unit.idle_duration} fill="#31C48D" />
-              <Text
-                x="50%"
-                y="20"
-                textAnchor="middle"
-                dominantBaseline="middle"
-              >
-                {`Avg: ${calculateAverage(
-                  idleDurationData,
-                  unit.idle_duration
-                )} ${unit.idle_duration}`}
-              </Text>
+              <Bar dataKey={unit.idle_duration} fill="#F15A24" />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Start/Stop Location Chart */}
-      {/* <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Start/Stop Location</h2>
-        <div className="h-96">
-          <LoadScript googleMapsApiKey="AIzaSyCyaFfzx2egZfBNTFFXX3HRP-ypSBQhd28">
-            <GoogleMap
-              mapContainerStyle={{ width: '100%', height: '100%' }}
-              zoom={10}
-              center={initialCenter}
-            >
-              {validLocations.map((data, index) => (
-                <React.Fragment key={index}>
-                  {data.startLocation && (
-                    <Marker
-                      position={{
-                        lat: parseFloat(data.startLocation.split(',')[0]),
-                        lng: parseFloat(data.startLocation.split(',')[1]),
-                      }}
-                      icon={{
-                        url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                      }}
-                    />
-                  )}
-                  {data.stopLocation && (
-                    <Marker
-                      position={{
-                        lat: parseFloat(data.stopLocation.split(',')[0]),
-                        lng: parseFloat(data.stopLocation.split(',')[1]),
-                      }}
-                      icon={{
-                        url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                      }}
-                    />
-                  )}
-                  {data.startLocation && data.stopLocation && (
-                    <Polyline
-                      path={[
-                        {
-                          lat: parseFloat(data.startLocation.split(',')[0]),
-                          lng: parseFloat(data.startLocation.split(',')[1]),
-                        },
-                        {
-                          lat: parseFloat(data.stopLocation.split(',')[0]),
-                          lng: parseFloat(data.stopLocation.split(',')[1]),
-                        },
-                      ]}
-                      options={{ strokeColor: '#FF0000', strokeWeight: 2 }}
-                    />
-                  )}
-                </React.Fragment>
-              ))}
-            </GoogleMap>
-          </LoadScript>
+      {/* Stoppage Duration Chart */}
+      <div className="bg-white p-4 rounded-lg shadow">
+        <div className="flex flex-row justify-between items-center">
+          <h2 className="text-lg font-semibold mb-4">Stoppage Duration</h2>
+          <button
+            className="border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md"
+            onClick={() => toggleUnit("stoppage_duration")}
+          >
+            {unit.stoppage_duration === "s" ? "Seconds" : "Minutes"}
+          </button>
         </div>
-      </div> */}
+        <div className="h-96">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={stoppageDurationData} onClick={handleChartClick}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="record_date" tickFormatter={tickFormatter} />
+              <YAxis {...getYAxisProps("stoppage_duration")} />
+              <CustomTooltip />
+              <Legend />
+              <Bar dataKey={unit.stoppage_duration} fill="#4E73DF" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Start/Stop Locations */}
+
+      {/* 
+      <div className="bg-white p-4 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-3">
+        <h2 className="text-lg font-semibold mb-4">Start/Stop Locations</h2>
+        <div className="h-96">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={startStopLocationData} onClick={handleChartClick}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="index" />
+              <YAxis />
+              <CustomTooltip />
+              <Legend />
+              <Bar dataKey="startLocation" fill="#a0d911" />
+              <Bar dataKey="stopLocation" fill="#ffa940" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+      */}
     </div>
   );
 };
