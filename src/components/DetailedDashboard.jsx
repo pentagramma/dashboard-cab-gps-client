@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { GoogleMap, Marker, LoadScript } from '@react-google-maps/api';
-import GoogleMapReact from 'google-map-react';
 import { useNavigate } from 'react-router-dom';
-import { IoIosArrowBack } from "react-icons/io";
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css';
+import 'leaflet-defaulticon-compatibility';
 
 const DetailedDashboard = ({ selectedTrip }) => {
   const navigate = useNavigate();
@@ -20,11 +22,6 @@ const DetailedDashboard = ({ selectedTrip }) => {
 
   const convertToMinutes = (seconds) => {
     return (seconds / 60).toFixed(2); // Convert seconds to minutes
-  };
-
-  const markerPosition = {
-    lat: -3.745,
-    lng: -38.523
   };
 
   const data = [
@@ -64,55 +61,16 @@ const DetailedDashboard = ({ selectedTrip }) => {
 
   return (
     <div className="w-full h-full bg-gray-200 p-4 grid grid-cols-1 lg:grid-cols-3 gap-4 font-englebert">
-      
       <div className="col-span-1 lg:col-span-2 row-span-3 bg-white p-4 rounded-lg shadow-lg">
-      <h2 className="text-lg font-semibold mb-4">Trip Map</h2>
+        <h2 className="text-lg font-semibold mb-4">Trip Map</h2>
         <div className="w-full h-96 lg:h-[94%]">
-          <LoadScript googleMapsApiKey="AIzaSyBE3J5p9S6xy006V8yVE_6Fw49nExSlSxs">
-            <GoogleMap
-              mapContainerStyle={{ width: '100%', height: '100%' }}
-              zoom={10}
-              center={{
-                lat: 
-                // selectedTrip.drive_locations[0]?.start_location.lat || 0,
-                -3.745,
-
-                 lng: 
-                //  selectedTrip.drive_locations[0]?.start_location.long || 0 
-                -38.523
-              }}
-              
-            >
-              {selectedTrip.drive_locations.map((location, index) => (
-  <React.Fragment key={index}>
-    {location.start_location && (
-      <Marker
-        position={
-          // lat: location.start_location.lat,
-          // lng: location.start_location.long
-          markerPosition
-        }
-        icon={{
-          url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-        }}
-      />
-    )}
-      {/* {location.end_location && (
-      // <Marker
-      //   position={{
-      //     lat: location.end_location.lat,
-      //     lng: location.end_location.long
-      //   }}
-      //   icon={{
-      //     url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-      //   }}
-      // />
-
-//    )} */}
-  </React.Fragment>
-))}
-            </GoogleMap>
-          </LoadScript>
+          <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[51.505, -0.09]} />
+          </MapContainer>
         </div>
       </div>
       <div className="bg-white p-4 rounded-lg shadow-lg">
@@ -204,7 +162,6 @@ const DetailedDashboard = ({ selectedTrip }) => {
           </BarChart>
         </ResponsiveContainer>
       </div>
-      
     </div>
   );
 };
