@@ -66,10 +66,10 @@ const Dashboard = ({
 
     return Object.entries(dateMap)
       .map(([date, { totalDistance, count }]) => ({
-        date,
+        record_date: date,
         averageDistance: (totalDistance / count).toFixed(2),
       }))
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
+      .sort((a, b) => new Date(a.record_date) - new Date(b.record_date));
   };
 
   const distanceData = useMemo(
@@ -114,28 +114,6 @@ const Dashboard = ({
     [aggregateData]
   );
 
-  // const startStopLocationData = useMemo(() => {
-  //   const data = tripsForSelectedMmiId.map((ride, index) => ({
-  //     index: index + 1,
-  //     startLocation: ride.drive_locations[0]
-  //       ? `${ride.drive_locations[0].start_location.lat},${ride.drive_locations[0].start_location.long}`
-  //       : null,
-  //     stopLocation:
-  //       ride.drive_locations.length > 0
-  //         ? `${
-  //             ride.drive_locations[ride.drive_locations.length - 1].end_location
-  //               .lat
-  //           },${
-  //             ride.drive_locations[ride.drive_locations.length - 1].end_location
-  //               .long
-  //           }`
-  //         : null,
-  //   }));
-  //   return data.sort(
-  //     (a, b) => new Date(a.record_date) - new Date(b.record_date)
-  //   );
-  // }, [tripsForSelectedMmiId]);
-
   const handleChartClick = (data) => {
     if (data && data.activePayload) {
       const selectedTrip =
@@ -146,13 +124,9 @@ const Dashboard = ({
         endTime: selectedTrip.end_time,
       });
       setSelectedMmiId(selectedTrip.mmi_id);
-      navigate("/details");
+      navigate("/details", { state: { trip: selectedTrip } }); // Pass trip data as state
     }
   };
-
-  // const validLocations = startStopLocationData.filter(
-  //   (data) => data.startLocation || data.stopLocation
-  // );
 
   const toggleUnit = (key) => {
     setUnit((prevUnit) => ({
@@ -171,21 +145,11 @@ const Dashboard = ({
     return {};
   };
 
-  const tickFormatter = (timestamp) => {
+  const tickFormatter = (dateStr) => {
     try {
-      let date;
-      if (
-        typeof timestamp === "object" &&
-        timestamp !== null &&
-        "$numberLong" in timestamp
-      ) {
-        date = new Date(parseInt(timestamp.$numberLong, 10));
-      } else {
-        date = new Date(parseInt(timestamp, 10));
-      }
-      return format(date, "MMM d");
+      return format(new Date(dateStr), "MMM d");
     } catch (error) {
-      console.error("Error formatting date:", timestamp, error);
+      console.error("Error formatting date:", dateStr, error);
       return "";
     }
   };
@@ -203,9 +167,14 @@ const Dashboard = ({
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={distanceDataAggregated}>
+            <LineChart data={distanceDataAggregated} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" tickFormatter={tickFormatter} />
+              <XAxis
+                dataKey="record_date"
+                tickFormatter={tickFormatter}
+                // tickCount={distanceDataAggregated.length}
+                // interval={5}
+              />
               <YAxis />
               <CustomTooltip />
               <Line
@@ -281,7 +250,7 @@ const Dashboard = ({
               <YAxis {...getYAxisProps("idle_duration")} />
               <CustomTooltip />
               <Legend />
-              <Bar dataKey={unit.idle_duration} fill="#F15A24" />
+              <Bar dataKey={unit.idle_duration} fill="#34A2EB" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -306,32 +275,11 @@ const Dashboard = ({
               <YAxis {...getYAxisProps("stoppage_duration")} />
               <CustomTooltip />
               <Legend />
-              <Bar dataKey={unit.stoppage_duration} fill="#4E73DF" />
+              <Bar dataKey={unit.stoppage_duration} fill="#FF6961" />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
-
-      {/* Start/Stop Locations */}
-
-      {/* 
-      <div className="bg-white p-4 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-3">
-        <h2 className="text-lg font-semibold mb-4">Start/Stop Locations</h2>
-        <div className="h-96">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={startStopLocationData} onClick={handleChartClick}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="index" />
-              <YAxis />
-              <CustomTooltip />
-              <Legend />
-              <Bar dataKey="startLocation" fill="#a0d911" />
-              <Bar dataKey="stopLocation" fill="#ffa940" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-      */}
     </div>
   );
 };
