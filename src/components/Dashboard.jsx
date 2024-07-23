@@ -298,12 +298,11 @@ const Dashboard = ({
             <BarChart data={stoppageDurationData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="record_date" tickFormatter={tickFormatter} />
-              <YAxis
-                {...getYAxisProps(
-                  "stoppage_duration",
-                  unit.stoppage_duration === "s" ? [0, 5000] : null
-                )}
-              />
+              {unit.stoppage_duration === "min" ? (
+                <YAxis domain={[0, 20]} />
+              ) : (
+                <YAxis domain={[0, 1000]} />
+              )}
               <CustomTooltip />
               <Legend />
               <Bar dataKey={unit.stoppage_duration} fill="#FF6961" />
