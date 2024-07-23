@@ -72,38 +72,38 @@ function App() {
   // Example usage
   const formattedData = transformDataByDate(RIDES_DATA);
 
-  useEffect(() => {
-    const fetchRides = async () => {
-      setLoading(true);
-      try {
-        // Using the sample data for testing instead of an API call
-        const formattedRides = formatRidesData(RIDES_DATA);
-        setRides(formattedRides);
-        setLoading(false); // Set loading to false when fetching ends
-      } catch (error) {
-        console.error("Error fetching rides data:", error);
-        setLoading(false);
-      }
-    };
-    fetchRides();
-  }, []);
-
   // useEffect(() => {
   //   const fetchRides = async () => {
-  //     setLoading(true); // Set loading to true when fetching starts
+  //     setLoading(true);
   //     try {
-  //       const response = await axios.get(
-  //         "https://embifi-backend.onrender.com/api/rides"
-  //       );
-  //       setRides(response.data);
+  //       // Using the sample data for testing instead of an API call
+  //       const formattedRides = formatRidesData(RIDES_DATA);
+  //       setRides(formattedRides);
   //       setLoading(false); // Set loading to false when fetching ends
   //     } catch (error) {
   //       console.error("Error fetching rides data:", error);
-  //       setLoading(false); // Set loading to false in case of error
+  //       setLoading(false);
   //     }
   //   };
   //   fetchRides();
   // }, []);
+
+  useEffect(() => {
+    const fetchRides = async () => {
+      setLoading(true); // Set loading to true when fetching starts
+      try {
+        const response = await axios.get(
+          "https://embifi-backend.onrender.com/api/rides"
+        );
+        setRides(response.data);
+        setLoading(false); // Set loading to false when fetching ends
+      } catch (error) {
+        console.error("Error fetching rides data:", error);
+        setLoading(false); // Set loading to false in case of error
+      }
+    };
+    fetchRides();
+  }, []);
 
   const resetState = () => {
     setSelectedMmiId(null);

@@ -23,27 +23,52 @@ const Dashboard = ({
 }) => {
   const navigate = useNavigate();
   const [unit, setUnit] = useState({
-    movement_duration: "s",
-    idle_duration: "s",
-    stoppage_duration: "s",
+    movement_duration: "min",
+    idle_duration: "min",
+    stoppage_duration: "min",
   });
+
+  const normalizeRidesData = (rides) => {
+    return rides.map((ride) => ({
+      ...ride,
+      start_time:
+        typeof ride.start_time === "object"
+          ? ride.start_time.$numberLong
+          : ride.start_time,
+      end_time:
+        typeof ride.end_time === "object"
+          ? ride.end_time.$numberLong
+          : ride.end_time,
+    }));
+  };
+
+  const normalizedRides = useMemo(() => normalizeRidesData(rides), [rides]);
 
   const tripsForSelectedMmiId = useMemo(() => {
     return selectedMmiId
-      ? rides.filter((ride) => ride.mmi_id === selectedMmiId)
-      : rides;
-  }, [selectedMmiId, rides]);
+      ? normalizedRides.filter((ride) => ride.mmi_id === selectedMmiId)
+      : normalizedRides;
+  }, [selectedMmiId, normalizedRides]);
 
   const aggregateData = useCallback(
     (key, label, conversion) => {
-      const data = tripsForSelectedMmiId.map((ride, index) => ({
-        index: index + 1,
-        [label]: conversion ? (ride[key] / 60).toFixed(2) : ride[key],
-        record_date: ride.record_date,
-      }));
-      return data.sort(
-        (a, b) => new Date(a.record_date) - new Date(b.record_date)
-      );
+      const dateMap = tripsForSelectedMmiId.reduce((acc, ride) => {
+        const dateKey = new Date(ride.record_date).toISOString().split("T")[0];
+        if (!acc[dateKey]) {
+          acc[dateKey] = { total: 0, count: 0 };
+        }
+        acc[dateKey].total += conversion ? ride[key] / 60 : ride[key];
+        acc[dateKey].count += 1;
+        return acc;
+      }, {});
+
+      return Object.entries(dateMap)
+        .map(([date, { total, count }], index) => ({
+          record_date: date,
+          [label]: (total / count).toFixed(2),
+          index: index, // Ensure index is set correctly
+        }))
+        .sort((a, b) => new Date(a.record_date) - new Date(b.record_date));
     },
     [tripsForSelectedMmiId]
   );
@@ -53,33 +78,9 @@ const Dashboard = ({
     return (total / data.length).toFixed(2);
   };
 
-  const aggregateByDate = (data) => {
-    const dateMap = data.reduce((acc, ride) => {
-      const dateKey = new Date(ride.record_date).toISOString().split("T")[0];
-      if (!acc[dateKey]) {
-        acc[dateKey] = { totalDistance: 0, count: 0 };
-      }
-      acc[dateKey].totalDistance += parseFloat(ride.km);
-      acc[dateKey].count += 1;
-      return acc;
-    }, {});
-
-    return Object.entries(dateMap)
-      .map(([date, { totalDistance, count }]) => ({
-        record_date: date,
-        averageDistance: (totalDistance / count).toFixed(2),
-      }))
-      .sort((a, b) => new Date(a.record_date) - new Date(b.record_date));
-  };
-
   const distanceData = useMemo(
     () => aggregateData("distance", "km"),
     [aggregateData]
-  );
-
-  const distanceDataAggregated = useMemo(
-    () => aggregateByDate(distanceData),
-    [distanceData]
   );
 
   const movementDurationData = useMemo(
@@ -91,6 +92,7 @@ const Dashboard = ({
       ),
     [aggregateData, unit]
   );
+
   const idleDurationData = useMemo(
     () =>
       aggregateData(
@@ -100,6 +102,7 @@ const Dashboard = ({
       ),
     [aggregateData, unit]
   );
+
   const stoppageDurationData = useMemo(
     () =>
       aggregateData(
@@ -109,39 +112,68 @@ const Dashboard = ({
       ),
     [aggregateData, unit]
   );
+
   const speedData = useMemo(
     () => aggregateData("average_speed", "km/h"),
     [aggregateData]
   );
 
   const handleChartClick = (data) => {
-    if (data && data.activePayload) {
-      const selectedTrip =
-        tripsForSelectedMmiId[data.activePayload[0].payload.index - 1];
-      setSelectedTrip(selectedTrip);
-      setStartEndTime({
-        startTime: selectedTrip.start_time,
-        endTime: selectedTrip.end_time,
-      });
-      setSelectedMmiId(selectedTrip.mmi_id);
-      navigate("/details", { state: { trip: selectedTrip } }); // Pass trip data as state
+    console.log("Chart clicked data:", data);
+    if (data && data.activePayload && data.activePayload.length > 0) {
+      const index = data.activePayload[0].payload.index;
+      console.log("Calculated index:", index);
+      console.log("Trips for selected MMI ID:", tripsForSelectedMmiId);
+      console.log(
+        "Length of tripsForSelectedMmiId:",
+        tripsForSelectedMmiId.length
+      );
+
+      if (index >= 0 && index < tripsForSelectedMmiId.length) {
+        const selectedTrip = tripsForSelectedMmiId[index];
+        console.log("Selected trip:", selectedTrip);
+
+        if (selectedTrip) {
+          setSelectedTrip(selectedTrip);
+          setStartEndTime({
+            startTime: selectedTrip.start_time,
+            endTime: selectedTrip.end_time,
+          });
+          setSelectedMmiId(selectedTrip.mmi_id);
+          navigate("/details", { state: { trip: selectedTrip } });
+        } else {
+          console.error("Selected trip is undefined at index:", index);
+        }
+      } else {
+        console.error("Invalid index:", index);
+      }
+    } else {
+      console.error("Invalid data or data.activePayload:", data);
     }
   };
 
   const toggleUnit = (key) => {
     setUnit((prevUnit) => ({
       ...prevUnit,
-      [key]: prevUnit[key] === "s" ? "min" : "s",
+      [key]: prevUnit[key] === "min" ? "s" : "min",
     }));
   };
 
   const getYAxisProps = (key) => {
+    if (unit[key] === "s") {
+      return {
+        domain: [0, 18000],
+        ticks: [...Array(181).keys()].map((val) => val * 100),
+      };
+    }
+
     if (unit[key] === "min") {
       return {
         domain: [0, 500],
-        ticks: [...Array(11).keys()].map((val) => val * 50),
+        ticks: [...Array(51).keys()].map((val) => val * 10),
       };
     }
+
     return {};
   };
 
@@ -160,29 +192,18 @@ const Dashboard = ({
       <div className="bg-white p-4 rounded-lg shadow flex-row">
         <div className="flex flex-row justify-between items-center">
           <h2 className="text-lg font-semibold mb-4">Distance</h2>
-          <span>{`Avg: ${calculateAverage(
-            distanceDataAggregated,
-            "averageDistance"
-          )} km`}</span>
+          <span>{`Avg: ${calculateAverage(distanceData, "km")} km`}</span>
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={distanceDataAggregated} onClick={handleChartClick}>
+            <BarChart data={distanceData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="record_date"
-                tickFormatter={tickFormatter}
-                // tickCount={distanceDataAggregated.length}
-                // interval={5}
-              />
+              <XAxis dataKey="record_date" tickFormatter={tickFormatter} />
               <YAxis />
               <CustomTooltip />
-              <Line
-                type="monotone"
-                dataKey="averageDistance"
-                stroke="#8884d8"
-              />
-            </LineChart>
+              <Legend />
+              <Bar dataKey="km" fill="#8884d8" />
+            </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
@@ -195,7 +216,7 @@ const Dashboard = ({
             className="border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md"
             onClick={() => toggleUnit("movement_duration")}
           >
-            {unit.movement_duration === "s" ? "Seconds" : "Minutes"}
+            {unit.movement_duration === "min" ? "Minutes" : "Seconds"}
           </button>
         </div>
         <div className="h-96">
@@ -203,7 +224,12 @@ const Dashboard = ({
             <BarChart data={movementDurationData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="record_date" tickFormatter={tickFormatter} />
-              <YAxis {...getYAxisProps("movement_duration")} />
+              <YAxis
+                {...getYAxisProps(
+                  "movement_duration",
+                  unit.movement_duration === "s" ? [0, 18000] : [0, 500]
+                )}
+              />
               <CustomTooltip />
               <Legend />
               <Bar dataKey={unit.movement_duration} fill="#FACA15" />
@@ -239,7 +265,7 @@ const Dashboard = ({
             className="border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md"
             onClick={() => toggleUnit("idle_duration")}
           >
-            {unit.idle_duration === "s" ? "Seconds" : "Minutes"}
+            {unit.idle_duration === "min" ? "Minutes" : "Seconds"}
           </button>
         </div>
         <div className="h-96">
@@ -264,7 +290,7 @@ const Dashboard = ({
             className="border-purple-800 border p-1 mb-4 hover:bg-purple-800 hover:text-white rounded-md"
             onClick={() => toggleUnit("stoppage_duration")}
           >
-            {unit.stoppage_duration === "s" ? "Seconds" : "Minutes"}
+            {unit.stoppage_duration === "min" ? "Minutes" : "Seconds"}
           </button>
         </div>
         <div className="h-96">
@@ -272,7 +298,12 @@ const Dashboard = ({
             <BarChart data={stoppageDurationData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="record_date" tickFormatter={tickFormatter} />
-              <YAxis {...getYAxisProps("stoppage_duration")} />
+              <YAxis
+                {...getYAxisProps(
+                  "stoppage_duration",
+                  unit.stoppage_duration === "s" ? [0, 5000] : null
+                )}
+              />
               <CustomTooltip />
               <Legend />
               <Bar dataKey={unit.stoppage_duration} fill="#FF6961" />
