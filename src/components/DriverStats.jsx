@@ -159,17 +159,20 @@ const DriverStat = ({
   };
 
   const getYAxisProps = (key) => {
-    if (unit[key] === "min") {
+    if (unit[key] === "s") {
       return {
-        domain: [0, 600],
-        ticks: [...Array(11).keys()].map((val) => val * 50),
-      };
-    } else {
-      return {
-        domain: [0, 50000],
-        ticks: [...Array(11).keys()].map((val) => val * 50),
+        domain: [0, 18000],
+        ticks: [...Array(181).keys()].map((val) => val * 100),
       };
     }
+
+    if (unit[key] === "min") {
+      return {
+        domain: [0, 500],
+        ticks: [...Array(51).keys()].map((val) => val * 10),
+      };
+    }
+
     return {};
   };
 
@@ -222,7 +225,12 @@ const DriverStat = ({
             <BarChart data={movementDurationData} onClick={handleChartClick}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" tick={{ angle: -45, textAnchor: "end" }} />
-              <YAxis domain={[0, "auto"]} />
+              {unit.movement_duration === "s" ? (
+                <YAxis domain={[0, "auto"]} />
+              ) : (
+                <YAxis domain={[0, "auto"]} />
+              )}
+
               <CustomTooltip />
               <Legend />
               <Bar dataKey={unit.movement_duration} fill="#FACA15" />
